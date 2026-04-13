@@ -67,7 +67,7 @@
     </script>
 
     <script type="text/babel">
-        const { useState, useEffect, useMemo } = React;
+        const { useState, useEffect, useMemo, useRef } = React;
 
         const geminiApiKey = ""; 
 
@@ -116,6 +116,8 @@
             const [aiAnalysis, setAiAnalysis] = useState(null);
             const [modalMessage, setModalMessage] = useState(null);
             const [isCloudSyncing, setIsCloudSyncing] = useState(false);
+            
+            const authAttempted = useRef(false);
 
             const isValidFormat = useMemo(() => {
                 const regex = /^[A-Z]{3}-[0-9]{4}$/i;
@@ -133,7 +135,9 @@
 
             useEffect(() => {
                 const initAuth = async () => {
-                    if (!window.FirebaseServices) return;
+                    if (!window.FirebaseServices || authAttempted.current) return;
+                    authAttempted.current = true;
+                    
                     const { auth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } = window.FirebaseServices;
                     try {
                         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -141,11 +145,21 @@
                         } else {
                             await signInAnonymously(auth);
                         }
-                    } catch (e) { console.error("Auth Error:", e); }
-                    const unsubscribe = onAuthStateChanged(auth, setUser);
-                    return () => unsubscribe();
+                    } catch (e) { 
+                        console.error("Auth Error:", e);
+                        setModalMessage("Gagal menghubungkan ke layanan cloud. Coba segarkan halaman.");
+                    }
+                    onAuthStateChanged(auth, (u) => {
+                        setUser(u);
+                    });
                 };
-                const interval = setInterval(() => { if (window.FirebaseServices) { initAuth(); clearInterval(interval); } }, 100);
+                
+                const interval = setInterval(() => { 
+                    if (window.FirebaseServices) { 
+                        initAuth(); 
+                        clearInterval(interval); 
+                    } 
+                }, 100);
                 return () => clearInterval(interval);
             }, []);
 
@@ -158,7 +172,10 @@
                 const unsubscribe = onSnapshot(q, (snapshot) => {
                     setEntries(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
                     setIsCloudSyncing(false);
-                }, (error) => { console.error("Firestore Error:", error); setIsCloudSyncing(false); });
+                }, (error) => { 
+                    console.error("Firestore Error:", error); 
+                    setIsCloudSyncing(false); 
+                });
                 return () => unsubscribe();
             }, [user, isLoggedIn, accessKey, userName]);
 
@@ -200,6 +217,7 @@
             };
 
             const handleLogout = () => {
+                if(!confirm("Keluar dari akun ini?")) return;
                 localStorage.removeItem('woker_access_key');
                 localStorage.removeItem('woker_user_name');
                 setIsLoggedIn(false); setAccessKey(''); setUserName(''); setEntries([]);
@@ -207,7 +225,11 @@
 
             const handleSubmit = async (e) => {
                 e.preventDefault();
-                if (!user) return setModalMessage("Menghubungkan ke server...");
+                if (!user) {
+                    setModalMessage("Mohon tunggu, aplikasi sedang menghubungkan ke server...");
+                    return;
+                }
+                
                 setIsSubmitting(true);
                 const { db, appId, collection, addDoc } = window.FirebaseServices;
                 const safeKey = `data_${accessKey.trim().toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
@@ -217,13 +239,19 @@
                     date: formData.date,
                     hours: parseFloat(formData.hours),
                     associates: formData.associates || '-',
-                    author: userName, userId: user.uid, createdAt: new Date().toISOString()
+                    author: userName, 
+                    userId: user.uid, 
+                    createdAt: new Date().toISOString()
                 };
                 try {
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', safeKey), newEntry);
                     setFormData({ ...formData, client: '', task: '', hours: '', associates: '' });
-                } catch (err) { setModalMessage("Gagal menyimpan aktivitas."); }
-                finally { setIsSubmitting(false); }
+                } catch (err) { 
+                    console.error("Submit Error:", err);
+                    setModalMessage("Gagal menyimpan aktivitas. Silakan periksa koneksi Anda."); 
+                } finally {
+                    setIsSubmitting(false);
+                }
             };
 
             const handleDelete = async (id) => {
@@ -277,7 +305,7 @@
                                         <span className="text-xs md:text-sm font-bold text-slate-500 uppercase tracking-widest">Ingat Saya</span>
                                     </label>
                                     <div>
-                                        <button disabled={!isValidFormat} className={`w-full font-black py-5 md:py-6 rounded-2xl md:rounded-[2rem] shadow-xl transition-standard uppercase text-xs tracking-[0.2em] ${isValidFormat ? 'bg-[#0f0e32] text-white' : 'bg-slate-100 text-slate-300'}`}>Masuk</button>
+                                        <button disabled={!isValidFormat} className={`w-full font-black py-5 md:py-6 rounded-2xl md:rounded-[2rem] shadow-xl transition-standard uppercase text-xs tracking-[0.2em] ${isValidFormat ? 'bg-[#0f0e32] text-white active:scale-95' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}>Masuk</button>
                                         <p className="text-[9px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-loose text-center mt-8 opacity-70 italic">
                                             ANDA DAPAT MENGAKSES AKUN PADA PERANGKAT LAIN DENGAN MEMASUKKAN KODE RAHASIA.
                                         </p>
@@ -294,10 +322,10 @@
                     <div className="min-h-screen bg-white flex flex-col w-full items-center justify-center p-6">
                         <div className="w-full max-w-md text-center">
                             <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-3 tracking-tight uppercase">Siapa Anda?</h2>
-                            <p className="text-slate-500 font-medium text-sm mb-8 italic">Masukkan nama lengkap atau inisial Anda.</p>
+                            <p className="text-slate-500 font-medium text-sm mb-8 italic text-center">Masukkan nama lengkap atau inisial Anda.</p>
                             <form onSubmit={handleSetName} className="space-y-6">
                                 <input name="username" type="text" required placeholder="e.g. Bli Juan" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl md:rounded-[2rem] outline-none focus:border-[#2c2a7b] font-bold text-center text-lg md:text-xl shadow-inner uppercase" />
-                                <button type="submit" className="w-full bg-[#0f0e32] text-white font-black py-5 md:py-6 rounded-2xl md:rounded-[2rem] shadow-xl uppercase text-xs tracking-[0.2em]">SIMPAN</button>
+                                <button type="submit" className="w-full bg-[#0f0e32] text-white font-black py-5 md:py-6 rounded-2xl md:rounded-[2rem] shadow-xl uppercase text-xs tracking-[0.2em] active:scale-95 transition-all">SIMPAN</button>
                             </form>
                         </div>
                     </div>
@@ -371,10 +399,17 @@
                                                 <textarea required value={formData.task} onChange={e => setFormData({...formData, task: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none min-h-[120px] text-sm font-medium leading-relaxed" placeholder="Uraikan giat Anda..."></textarea>
                                             </div>
                                         </div>
-                                        <button disabled={isSubmitting || !user} className={`w-full font-black py-5 rounded-xl shadow-lg transition-standard transform active:scale-[0.98] uppercase tracking-[0.2em] text-[11px] flex items-center justify-center gap-3 ${isSubmitting || !user ? 'bg-slate-300 text-slate-500' : 'bg-[#0f0e32] text-white hover:bg-[#161440]'}`}>
+                                        <button 
+                                            disabled={isSubmitting} 
+                                            type="submit"
+                                            className={`w-full font-black py-5 rounded-xl shadow-lg transition-standard transform active:scale-[0.98] uppercase tracking-[0.2em] text-[11px] flex items-center justify-center gap-3 ${isSubmitting ? 'bg-slate-300 text-slate-500 cursor-wait' : 'bg-[#0f0e32] text-white hover:bg-[#161440]'}`}
+                                        >
                                             {isSubmitting && <span className="animate-spin-custom w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>}
-                                            {isSubmitting ? 'MENYIMPAN...' : 'SIMPAN AKTIVITAS'}
+                                            {isSubmitting ? 'MENYIMPAN...' : 'SIMPAN'}
                                         </button>
+                                        {!user && !isSubmitting && (
+                                            <p className="text-[9px] text-orange-600 font-bold text-center mt-2 animate-pulse uppercase">Menghubungkan ke Cloud...</p>
+                                        )}
                                     </form>
                                 </div>
 
