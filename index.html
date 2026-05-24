@@ -121,9 +121,10 @@
             const [isCloudSyncing, setIsCloudSyncing] = useState(false);
             const [cloudError, setCloudError] = useState(false);
 
-            // States untuk Custom Modals baru
+            // States untuk Custom Modals
             const [finishTaskModal, setFinishTaskModal] = useState(null);
-            const [finishTimeInput, setFinishTimeInput] = useState('');
+            // State baru untuk menampung data yang bisa diedit di modal penyelesaian
+            const [finishData, setFinishData] = useState({ date: '', startTime: '', endTime: '' });
             const [confirmAction, setConfirmAction] = useState(null);
 
             const isValidFormat = useMemo(() => {
@@ -315,30 +316,46 @@
 
             // Fungsi untuk memunculkan modal selesaikan pekerjaan
             const openFinishModal = (entry) => {
-                setFinishTimeInput(getCurrentTime());
+                setFinishData({
+                    date: entry.date,
+                    startTime: entry.startTime,
+                    endTime: getCurrentTime() // Otomatis terisi jam saat ini
+                });
                 setFinishTaskModal(entry);
             };
 
             // Fungsi untuk mengeksekusi penyelesaian pekerjaan dari modal
             const submitFinishTask = async () => {
-                if (!finishTaskModal) return;
+                if (!finishTaskModal || !finishData.startTime || !finishData.endTime || !finishData.date) {
+                    setModalMessage("Mohon lengkapi Tanggal, Waktu Mulai, dan Waktu Selesai.");
+                    return;
+                }
                 
                 const { db, appId, doc, updateDoc } = window.FirebaseServices;
                 const safeKey = `data_${accessKey.trim().toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
                 
                 let calculatedHours = 0;
-                if (finishTaskModal.startTime) {
-                    const start = new Date(`1970-01-01T${finishTaskModal.startTime}:00`);
-                    const end = new Date(`1970-01-01T${finishTimeInput}:00`);
-                    let diffMs = end - start;
-                    if (diffMs < 0) diffMs += 24 * 60 * 60 * 1000; 
+                const start = new Date(`${finishData.date}T${finishData.startTime}:00`);
+                // Asumsi jika jam selesai lebih kecil, berarti melewati tengah malam di hari berikutnya
+                let endDate = finishData.date;
+                if (finishData.endTime < finishData.startTime) {
+                    const nextDay = new Date(start);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    endDate = nextDay.toISOString().split('T')[0];
+                }
+                const end = new Date(`${endDate}T${finishData.endTime}:00`);
+                
+                let diffMs = end - start;
+                if (diffMs > 0) {
                     calculatedHours = diffMs / (1000 * 60 * 60);
                 }
 
                 try {
                     const docRef = doc(db, 'artifacts', appId, 'public', 'data', safeKey, finishTaskModal.id);
                     await updateDoc(docRef, {
-                        endTime: finishTimeInput,
+                        date: finishData.date,
+                        startTime: finishData.startTime,
+                        endTime: finishData.endTime,
                         hours: parseFloat(calculatedHours.toFixed(2))
                     });
                     setFinishTaskModal(null);
@@ -650,22 +667,46 @@
                         </div>
                     )}
 
-                    {/* Finish Task Modal (Opsi ubah waktu) */}
+                    {/* Finish Task Modal (Opsi Lengkap) */}
                     {finishTaskModal && (
                         <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[1000] flex items-center justify-center p-6 text-center">
-                            <div className="bg-white rounded-[2.5rem] md:rounded-[4rem] p-8 md:p-10 max-w-sm w-full shadow-2xl border border-slate-100 animate-in zoom-in duration-300">
+                            <div className="bg-white rounded-[2.5rem] md:rounded-[3rem] p-8 md:p-10 max-w-sm w-full shadow-2xl border border-slate-100 animate-in zoom-in duration-300">
                                 <h4 className="font-black mb-2 text-[#0f0e32] text-xl md:text-2xl uppercase italic">Selesaikan</h4>
                                 <p className="text-slate-500 text-xs md:text-sm mb-6 font-bold truncate">{finishTaskModal.jobTitle || finishTaskModal.client}</p>
                                 
-                                <div className="text-left mb-8">
-                                    <label className="text-[10px] md:text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2 block text-center">Waktu Selesai</label>
-                                    <input 
-                                        type="time" 
-                                        value={finishTimeInput} 
-                                        onChange={(e) => setFinishTimeInput(e.target.value)}
-                                        className="w-full p-4 md:p-5 bg-slate-50 border border-slate-200 rounded-2xl outline-none text-xl md:text-2xl font-black text-center focus:border-[#2c2a7b]" 
-                                    />
-                                    <p className="text-[9px] md:text-[10px] mt-3 text-slate-400 font-bold text-center">Sesuaikan jam jika waktu selesai Anda berbeda dengan jam saat ini.</p>
+                                <div className="space-y-4 mb-8 text-left">
+                                    <div className="space-y-1">
+                                        <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block">Tanggal</label>
+                                        <input 
+                                            type="date" 
+                                            value={finishData.date} 
+                                            onChange={(e) => setFinishData({...finishData, date: e.target.value})}
+                                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm font-bold focus:border-[#2c2a7b]" 
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block text-center">Waktu Mulai</label>
+                                            <input 
+                                                type="time" 
+                                                value={finishData.startTime} 
+                                                onChange={(e) => setFinishData({...finishData, startTime: e.target.value})}
+                                                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-lg md:text-xl font-black text-center focus:border-[#2c2a7b]" 
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block text-center">Waktu Selesai</label>
+                                            <input 
+                                                type="time" 
+                                                value={finishData.endTime} 
+                                                onChange={(e) => setFinishData({...finishData, endTime: e.target.value})}
+                                                className="w-full p-3 bg-[#f0f4ff] border border-blue-200 text-[#2c2a7b] rounded-xl outline-none text-lg md:text-xl font-black text-center focus:border-[#2c2a7b]" 
+                                            />
+                                        </div>
+                                    </div>
+                                    <p className="text-[9px] md:text-[10px] mt-2 text-slate-400 font-bold text-center leading-relaxed">
+                                        Sesuaikan data di atas jika terdapat ketidakakuratan sebelum disimpan secara permanen.
+                                    </p>
                                 </div>
 
                                 <div className="flex gap-3">
