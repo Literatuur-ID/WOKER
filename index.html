@@ -494,23 +494,27 @@
                                                 <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Klien</label>
                                                 <input required type="text" value={formData.client} onChange={e => setFormData({...formData, client: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-[#2c2a7b] font-bold text-sm" placeholder="e.g. BANK INDONESIA" />
                                             </div>
-                                            <div className="bg-slate-50/50 p-4 md:p-5 rounded-2xl border border-slate-100 space-y-4">
-                                                <div className="space-y-2">
-                                                    <label className="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest block text-center">Tanggal</label>
-                                                    <input required type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} className="w-full min-w-0 p-3 md:p-4 bg-white border border-slate-200 rounded-xl outline-none text-sm md:text-base font-black text-[#0f0e32] text-center focus:border-[#2c2a7b] transition-colors shadow-sm" />
+                                            
+                                            {/* TANGGAL & WAKTU - Gaya Minimalis Konsisten */}
+                                            <div className="space-y-4">
+                                                <div className="space-y-1">
+                                                    <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tanggal</label>
+                                                    <input required type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm font-bold focus:border-[#2c2a7b] transition-colors" />
                                                 </div>
+                                                
                                                 <div className="flex flex-col md:flex-row gap-4">
-                                                    <div className="flex-1 space-y-2">
-                                                        <label className="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest block text-center">Waktu Mulai</label>
-                                                        <input required type="time" value={formData.startTime} onChange={e => setFormData({...formData, startTime: e.target.value})} className="w-full min-w-0 p-3 md:p-4 bg-white border border-slate-200 rounded-xl outline-none text-sm md:text-base font-black text-[#0f0e32] text-center focus:border-[#2c2a7b] transition-colors shadow-sm" />
+                                                    <div className="flex-1 space-y-1">
+                                                        <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Waktu Mulai</label>
+                                                        <input required type="time" value={formData.startTime} onChange={e => setFormData({...formData, startTime: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm font-bold focus:border-[#2c2a7b] transition-colors" />
                                                     </div>
-                                                    <div className="flex-1 space-y-2">
-                                                        <label className="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest block text-center">Waktu Selesai</label>
-                                                        <input type="time" value={formData.endTime} onChange={e => setFormData({...formData, endTime: e.target.value})} className="w-full min-w-0 p-3 md:p-4 bg-white border border-slate-200 rounded-xl outline-none text-sm md:text-base font-black text-[#0f0e32] text-center focus:border-[#2c2a7b] transition-colors shadow-sm" />
-                                                        <p className="text-[8px] font-bold text-orange-500 italic block text-center mt-1">*Opsional (Bisa diisi nanti)</p>
+                                                    <div className="flex-1 space-y-1">
+                                                        <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Waktu Selesai</label>
+                                                        <input type="time" value={formData.endTime} onChange={e => setFormData({...formData, endTime: e.target.value})} className="w-full p-4 bg-[#f0f4ff] border border-blue-200 text-[#2c2a7b] rounded-xl outline-none text-sm font-bold focus:border-[#2c2a7b] transition-colors" />
+                                                        <p className="text-[8px] font-bold text-orange-500 italic ml-1 mt-1">*Opsional (Bisa diisi nanti)</p>
                                                     </div>
                                                 </div>
                                             </div>
+
                                             <div className="space-y-1">
                                                 <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Associates</label>
                                                 <input type="text" value={formData.associates} onChange={e => setFormData({...formData, associates: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm font-bold" placeholder="e.g. Tana, Tini, & Tunu" />
@@ -676,39 +680,35 @@
                                 <h4 className="font-black mb-2 text-[#0f0e32] text-xl md:text-2xl uppercase italic">Selesaikan</h4>
                                 <p className="text-slate-500 text-xs md:text-sm mb-6 font-bold truncate">{finishTaskModal.jobTitle || finishTaskModal.client}</p>
                                 
-                                <div className="mb-8">
-                                    <div className="bg-slate-50/50 p-4 md:p-5 rounded-2xl border border-slate-100 space-y-4 mb-4">
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest block text-center">Tanggal</label>
-                                            <input 
-                                                type="date" 
-                                                value={finishData.date} 
-                                                onChange={(e) => setFinishData({...finishData, date: e.target.value})}
-                                                className="w-full min-w-0 p-3 md:p-4 bg-white border border-slate-200 rounded-xl outline-none text-sm md:text-base font-black text-[#0f0e32] text-center focus:border-[#2c2a7b] transition-colors shadow-sm" 
-                                            />
-                                        </div>
-                                        <div className="flex flex-col gap-4">
-                                            <div className="w-full space-y-2">
-                                                <label className="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest block text-center">Waktu Mulai</label>
-                                                <input 
-                                                    type="time" 
-                                                    value={finishData.startTime} 
-                                                    onChange={(e) => setFinishData({...finishData, startTime: e.target.value})}
-                                                    className="w-full min-w-0 p-3 md:p-4 bg-white border border-slate-200 rounded-xl outline-none text-lg md:text-xl font-black text-[#0f0e32] text-center focus:border-[#2c2a7b] transition-colors shadow-sm" 
-                                                />
-                                            </div>
-                                            <div className="w-full space-y-2">
-                                                <label className="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest block text-center">Waktu Selesai</label>
-                                                <input 
-                                                    type="time" 
-                                                    value={finishData.endTime} 
-                                                    onChange={(e) => setFinishData({...finishData, endTime: e.target.value})}
-                                                    className="w-full min-w-0 p-3 md:p-4 bg-[#f0f4ff] border border-blue-200 text-[#2c2a7b] rounded-xl outline-none text-lg md:text-xl font-black text-center focus:border-[#2c2a7b] transition-colors shadow-sm" 
-                                                />
-                                            </div>
-                                        </div>
+                                <div className="mb-8 space-y-4 text-left">
+                                    <div className="space-y-1">
+                                        <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block">Tanggal</label>
+                                        <input 
+                                            type="date" 
+                                            value={finishData.date} 
+                                            onChange={(e) => setFinishData({...finishData, date: e.target.value})}
+                                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm font-bold focus:border-[#2c2a7b] transition-colors" 
+                                        />
                                     </div>
-                                    <p className="text-[9px] md:text-[10px] text-slate-400 font-bold text-center leading-relaxed">
+                                    <div className="space-y-1">
+                                        <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block">Waktu Mulai</label>
+                                        <input 
+                                            type="time" 
+                                            value={finishData.startTime} 
+                                            onChange={(e) => setFinishData({...finishData, startTime: e.target.value})}
+                                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm font-bold focus:border-[#2c2a7b] transition-colors" 
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block">Waktu Selesai</label>
+                                        <input 
+                                            type="time" 
+                                            value={finishData.endTime} 
+                                            onChange={(e) => setFinishData({...finishData, endTime: e.target.value})}
+                                            className="w-full p-4 bg-[#f0f4ff] border border-blue-200 text-[#2c2a7b] rounded-xl outline-none text-sm font-bold focus:border-[#2c2a7b] transition-colors" 
+                                        />
+                                    </div>
+                                    <p className="text-[9px] md:text-[10px] text-slate-400 font-bold text-center leading-relaxed mt-4">
                                         Sesuaikan data di atas jika terdapat ketidakakuratan sebelum disimpan secara permanen.
                                     </p>
                                 </div>
