@@ -498,17 +498,16 @@
                                                 <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tanggal</label>
                                                 <input required type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} className="w-full min-w-0 p-3 md:p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm md:text-base font-bold text-center focus:border-[#2c2a7b] transition-colors" />
                                             </div>
-                                            <div className="space-y-1">
-                                                <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Waktu (Mulai - Selesai)</label>
-                                                <div className="flex gap-3">
-                                                    <div className="flex-1 min-w-0">
-                                                        <input required type="time" value={formData.startTime} onChange={e => setFormData({...formData, startTime: e.target.value})} className="w-full min-w-0 p-3 md:p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm md:text-base font-bold text-center focus:border-[#2c2a7b] transition-colors" />
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <input type="time" value={formData.endTime} onChange={e => setFormData({...formData, endTime: e.target.value})} className="w-full min-w-0 p-3 md:p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm md:text-base font-bold text-center focus:border-[#2c2a7b] transition-colors" />
-                                                    </div>
+                                            <div className="flex flex-col md:flex-row gap-4">
+                                                <div className="flex-1 space-y-1">
+                                                    <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Waktu Mulai</label>
+                                                    <input required type="time" value={formData.startTime} onChange={e => setFormData({...formData, startTime: e.target.value})} className="w-full min-w-0 p-3 md:p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm md:text-base font-bold text-center focus:border-[#2c2a7b] transition-colors" />
                                                 </div>
-                                                <p className="text-[8px] font-bold text-orange-500 italic ml-1 mt-1">*Selesai opsional (Bisa diisi nanti)</p>
+                                                <div className="flex-1 space-y-1">
+                                                    <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Waktu Selesai</label>
+                                                    <input type="time" value={formData.endTime} onChange={e => setFormData({...formData, endTime: e.target.value})} className="w-full min-w-0 p-3 md:p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm md:text-base font-bold text-center focus:border-[#2c2a7b] transition-colors" />
+                                                    <p className="text-[8px] font-bold text-orange-500 italic ml-1 mt-1">*Opsional (Bisa diisi nanti)</p>
+                                                </div>
                                             </div>
                                             <div className="space-y-1">
                                                 <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Associates</label>
@@ -685,9 +684,9 @@
                                             className="w-full min-w-0 p-3 md:p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm md:text-base font-bold text-center focus:border-[#2c2a7b] transition-colors" 
                                         />
                                     </div>
-                                    <div className="flex gap-3">
-                                        <div className="flex-1 min-w-0 space-y-1">
-                                            <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block text-center">Waktu Mulai</label>
+                                    <div className="flex flex-col gap-4">
+                                        <div className="w-full space-y-1">
+                                            <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block text-left">Waktu Mulai</label>
                                             <input 
                                                 type="time" 
                                                 value={finishData.startTime} 
@@ -695,8 +694,8 @@
                                                 className="w-full min-w-0 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-lg md:text-xl font-black text-center focus:border-[#2c2a7b] transition-colors" 
                                             />
                                         </div>
-                                        <div className="flex-1 min-w-0 space-y-1">
-                                            <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block text-center">Waktu Selesai</label>
+                                        <div className="w-full space-y-1">
+                                            <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block text-left">Waktu Selesai</label>
                                             <input 
                                                 type="time" 
                                                 value={finishData.endTime} 
