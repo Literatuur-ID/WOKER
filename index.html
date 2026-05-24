@@ -52,20 +52,13 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, addDoc, deleteDoc, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, addDoc, deleteDoc, updateDoc, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         try {
             let firebaseConfig;
-            let isCustomConfig = false;
-
-            // Pengecekan Lingkungan: Canvas AI vs Hosting Pribadi
             if (typeof __firebase_config !== 'undefined') {
                 firebaseConfig = typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
             } else {
-                // =========================================================================
-                // TEMPAT KONFIGURASI FIREBASE ANDA 
-                // Ganti teks "ISI_..._DISINI" di bawah dengan data dari console.firebase.google.com
-                // =========================================================================
                 firebaseConfig = {
                     apiKey: "AIzaSyDJITYDWynAWET-W6UQmYyykt7qwK3MNXM",
                     authDomain: "woker-2b754.firebaseapp.com",
@@ -75,25 +68,21 @@
                     appId: "1:481506351045:web:074a37083a5585e1989dac",
                     measurementId: "G-LJPHP9KNTX"
                 };
-                isCustomConfig = true;
             }
 
-            // Jika config masih default, lemparkan error agar aplikasi tidak loading tanpa henti
-            if (isCustomConfig && firebaseConfig.apiKey.includes("ISI_API_KEY_ANDA_DISINI")) {
-                window.FirebaseSetupError = "Konfigurasi Database Belum Diatur. Silakan buka file index.html dan masukkan Firebase Config Anda agar aplikasi bisa menyimpan data secara online di semua perangkat.";
-            } else {
-                const app = initializeApp(firebaseConfig);
-                const auth = getAuth(app);
-                const db = getFirestore(app);
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'woker-custom-app';
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'woker-custom-app';
 
-                window.FirebaseServices = { 
-                    db, auth, appId, collection, doc, addDoc, deleteDoc, onSnapshot, 
-                    query, signInAnonymously, signInWithCustomToken, onAuthStateChanged 
-                };
-            }
+            window.FirebaseServices = { 
+                db, auth, appId, collection, doc, addDoc, deleteDoc, updateDoc, onSnapshot, 
+                query, signInAnonymously, signInWithCustomToken, onAuthStateChanged 
+            };
+            window.dispatchEvent(new Event('firebase-ready'));
         } catch (e) {
-            window.FirebaseSetupError = "Gagal memuat layanan Cloud: " + e.message;
+            console.error("Firebase init error:", e);
+            window.FirebaseSetupError = e.message;
         }
     </script>
 
@@ -104,14 +93,26 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
         );
 
+        // Fungsi bantuan untuk mendapatkan jam saat ini dalam format HH:MM
+        const getCurrentTime = () => {
+            const now = new Date();
+            return now.toTimeString().slice(0, 5);
+        };
+
         function App() {
             const [user, setUser] = useState(null);
+            const [firebaseReady, setFirebaseReady] = useState(false);
             const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('woker_access_key'));
             const [accessKey, setAccessKey] = useState(localStorage.getItem('woker_access_key') || '');
             const [userName, setUserName] = useState(localStorage.getItem('woker_user_name') || '');
             const [loginInput, setLoginInput] = useState('');
             const [entries, setEntries] = useState([]);
-            const [formData, setFormData] = useState({ client: '', jobTitle: '', task: '', date: new Date().toISOString().split('T')[0], hours: '', associates: '' });
+            
+            const [formData, setFormData] = useState({ 
+                client: '', jobTitle: '', task: '', date: new Date().toISOString().split('T')[0], 
+                startTime: getCurrentTime(), endTime: '', associates: '' 
+            });
+            
             const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
             const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
             const [activeTab, setActiveTab] = useState('input');
@@ -119,8 +120,11 @@
             const [modalMessage, setModalMessage] = useState(null);
             const [isCloudSyncing, setIsCloudSyncing] = useState(false);
             const [cloudError, setCloudError] = useState(false);
-            
-            const authAttempted = useRef(false);
+
+            // States untuk Custom Modals baru
+            const [finishTaskModal, setFinishTaskModal] = useState(null);
+            const [finishTimeInput, setFinishTimeInput] = useState('');
+            const [confirmAction, setConfirmAction] = useState(null);
 
             const isValidFormat = useMemo(() => {
                 const regex = /^[A-Z]{3}-[0-9]{4}$/i;
@@ -136,64 +140,82 @@
                 setLoginInput(formatted);
             };
 
+            // Setup Firebase Authentication Listeners
             useEffect(() => {
-                // Tampilkan error jika konfigurasi Firebase belum diisi
-                if (window.FirebaseSetupError) {
-                    setModalMessage(window.FirebaseSetupError);
-                    setCloudError(true);
-                    return;
-                }
-
-                const initAuth = async () => {
-                    if (!window.FirebaseServices || authAttempted.current) return;
-                    authAttempted.current = true;
+                let isMounted = true;
+                const setupAuth = async () => {
+                    if (!window.FirebaseServices) return;
                     
-                    const { auth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } = window.FirebaseServices;
                     try {
+                        const { auth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } = window.FirebaseServices;
                         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                             await signInWithCustomToken(auth, __initial_auth_token);
                         } else {
                             await signInAnonymously(auth);
                         }
-                    } catch (e) { 
-                        console.error("Auth Error:", e);
-                        setModalMessage("Gagal menghubungkan ke layanan cloud. Pastikan Firebase Authentication 'Anonymous' sudah aktif.");
-                        setCloudError(true);
+                        
+                        onAuthStateChanged(auth, (u) => {
+                            if (isMounted) {
+                                setUser(u);
+                                setFirebaseReady(true);
+                            }
+                        });
+                    } catch (error) {
+                        console.error("Auth Error:", error);
+                        if (isMounted) {
+                            setCloudError(true);
+                            setModalMessage("Gagal masuk ke layanan Cloud. Pastikan Anonymous Auth aktif.");
+                        }
                     }
-                    onAuthStateChanged(auth, (u) => {
-                        setUser(u);
-                    });
                 };
-                
-                const interval = setInterval(() => { 
-                    if (window.FirebaseServices) { 
-                        initAuth(); 
-                        clearInterval(interval); 
-                    } else if (window.FirebaseSetupError) {
+
+                if (window.FirebaseServices) {
+                    setupAuth();
+                } else {
+                    const listener = () => setupAuth();
+                    window.addEventListener('firebase-ready', listener);
+                    const interval = setInterval(() => {
+                        if (window.FirebaseServices) {
+                            clearInterval(interval);
+                            window.removeEventListener('firebase-ready', listener);
+                            setupAuth();
+                        } else if (window.FirebaseSetupError) {
+                            clearInterval(interval);
+                            setCloudError(true);
+                            setModalMessage(window.FirebaseSetupError);
+                        }
+                    }, 200);
+                    return () => {
+                        isMounted = false;
+                        window.removeEventListener('firebase-ready', listener);
                         clearInterval(interval);
-                    }
-                }, 100);
-                return () => clearInterval(interval);
+                    };
+                }
+                return () => { isMounted = false; };
             }, []);
 
+            // Ambil Data Firestore
             useEffect(() => {
-                if (!user || !isLoggedIn || !accessKey || !userName || !window.FirebaseServices) return;
+                if (!firebaseReady || !user || !isLoggedIn || !accessKey || !userName || !window.FirebaseServices) return;
+                
                 const { db, appId, collection, onSnapshot } = window.FirebaseServices;
                 setIsCloudSyncing(true);
                 const safeKey = `data_${accessKey.trim().toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
                 
-                // Gunakan Strict Path sesuai aturan agar tidak bentrok
                 const q = collection(db, 'artifacts', appId, 'public', 'data', safeKey);
                 const unsubscribe = onSnapshot(q, (snapshot) => {
                     setEntries(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
                     setIsCloudSyncing(false);
+                    setCloudError(false); 
                 }, (error) => { 
                     console.error("Firestore Error:", error); 
-                    setModalMessage("Gagal membaca data. Pastikan Firestore Database di Firebase Anda sudah diubah menjadi 'Test Mode' (Allow read, write).");
+                    setCloudError(true);
+                    setModalMessage("Gagal membaca data. Pastikan Firestore Database di Firebase Anda sudah diubah menjadi 'Test Mode' (Allow read, write) pada tab Rules.");
                     setIsCloudSyncing(false); 
                 });
+                
                 return () => unsubscribe();
-            }, [user, isLoggedIn, accessKey, userName]);
+            }, [user, isLoggedIn, accessKey, userName, firebaseReady]);
 
             const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
@@ -233,15 +255,20 @@
             };
 
             const handleLogout = () => {
-                if(!confirm("Keluar dari akun ini?")) return;
-                localStorage.removeItem('woker_access_key');
-                localStorage.removeItem('woker_user_name');
-                setIsLoggedIn(false); setAccessKey(''); setUserName(''); setEntries([]);
+                setConfirmAction({
+                    message: "Apakah Anda yakin ingin keluar dari akun ini?",
+                    onConfirm: () => {
+                        localStorage.removeItem('woker_access_key');
+                        localStorage.removeItem('woker_user_name');
+                        setIsLoggedIn(false); setAccessKey(''); setUserName(''); setEntries([]);
+                        setConfirmAction(null);
+                    }
+                });
             };
 
             const handleSubmit = async (e) => {
                 e.preventDefault();
-                if (!user) {
+                if (!user || !firebaseReady) {
                     setModalMessage("Gagal menyimpan. Aplikasi belum terhubung ke database Cloud.");
                     return;
                 }
@@ -249,39 +276,106 @@
                 setIsSubmitting(true);
                 const { db, appId, collection, addDoc } = window.FirebaseServices;
                 const safeKey = `data_${accessKey.trim().toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+                
+                let calculatedHours = 0;
+                // Jika waktu selesai diisi, hitung jamnya. Jika kosong, biarkan 0 (berjalan).
+                if (formData.startTime && formData.endTime) {
+                    const start = new Date(`1970-01-01T${formData.startTime}:00`);
+                    const end = new Date(`1970-01-01T${formData.endTime}:00`);
+                    let diffMs = end - start;
+                    if (diffMs < 0) diffMs += 24 * 60 * 60 * 1000;
+                    calculatedHours = diffMs / (1000 * 60 * 60);
+                }
+
                 const newEntry = {
                     client: formData.client.toUpperCase(),
                     jobTitle: formData.jobTitle,
                     task: formData.task,
                     date: formData.date,
-                    hours: parseFloat(formData.hours),
+                    startTime: formData.startTime,
+                    endTime: formData.endTime || '', 
+                    hours: parseFloat(calculatedHours.toFixed(2)),
                     associates: formData.associates || '-',
                     author: userName, 
                     userId: user.uid, 
                     createdAt: new Date().toISOString()
                 };
+                
                 try {
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', safeKey), newEntry);
-                    setFormData({ ...formData, client: '', jobTitle: '', task: '', hours: '', associates: '' });
+                    // Reset form dan set Waktu Mulai ke jam saat ini lagi
+                    setFormData({ ...formData, client: '', jobTitle: '', task: '', startTime: getCurrentTime(), endTime: '', associates: '' });
                 } catch (err) { 
                     console.error("Submit Error:", err);
-                    setModalMessage("Gagal menyimpan aktivitas. Silakan periksa koneksi internet atau Rules Firebase Anda."); 
+                    setModalMessage("Gagal menyimpan aktivitas. Silakan periksa koneksi internet atau 'Rules' Firestore Firebase Anda."); 
                 } finally {
                     setIsSubmitting(false);
                 }
             };
 
-            const handleDelete = async (id) => {
-                if (!confirm("Hapus catatan ini?")) return;
-                const { db, appId, doc, deleteDoc } = window.FirebaseServices;
+            // Fungsi untuk memunculkan modal selesaikan pekerjaan
+            const openFinishModal = (entry) => {
+                setFinishTimeInput(getCurrentTime());
+                setFinishTaskModal(entry);
+            };
+
+            // Fungsi untuk mengeksekusi penyelesaian pekerjaan dari modal
+            const submitFinishTask = async () => {
+                if (!finishTaskModal) return;
+                
+                const { db, appId, doc, updateDoc } = window.FirebaseServices;
                 const safeKey = `data_${accessKey.trim().toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
-                try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', safeKey, id)); }
-                catch (e) { setModalMessage("Gagal menghapus data."); }
+                
+                let calculatedHours = 0;
+                if (finishTaskModal.startTime) {
+                    const start = new Date(`1970-01-01T${finishTaskModal.startTime}:00`);
+                    const end = new Date(`1970-01-01T${finishTimeInput}:00`);
+                    let diffMs = end - start;
+                    if (diffMs < 0) diffMs += 24 * 60 * 60 * 1000; 
+                    calculatedHours = diffMs / (1000 * 60 * 60);
+                }
+
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', safeKey, finishTaskModal.id);
+                    await updateDoc(docRef, {
+                        endTime: finishTimeInput,
+                        hours: parseFloat(calculatedHours.toFixed(2))
+                    });
+                    setFinishTaskModal(null);
+                } catch (e) {
+                    console.error(e);
+                    setModalMessage("Gagal memperbarui status pekerjaan. Periksa perizinan Firebase Anda.");
+                }
+            };
+
+            const handleDelete = (id) => {
+                setConfirmAction({
+                    message: "Hapus catatan pekerjaan ini secara permanen?",
+                    onConfirm: async () => {
+                        const { db, appId, doc, deleteDoc } = window.FirebaseServices;
+                        const safeKey = `data_${accessKey.trim().toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+                        try { 
+                            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', safeKey, id)); 
+                        } catch (e) { 
+                            setModalMessage("Gagal menghapus data. Periksa perizinan Firebase Anda."); 
+                        }
+                        setConfirmAction(null);
+                    }
+                });
             };
 
             const exportExcel = () => {
                 if (filteredEntries.length === 0) return;
-                const data = filteredEntries.map(e => ({ "Tanggal": e.date, "Klien": e.client, "Pekerjaan": e.jobTitle || '-', "Detail Pekerjaan": e.task, "Associates": e.associates, "Durasi (Jam)": e.hours }));
+                const data = filteredEntries.map(e => ({ 
+                    "Tanggal": e.date, 
+                    "Klien": e.client, 
+                    "Pekerjaan": e.jobTitle || '-', 
+                    "Detail Pekerjaan": e.task, 
+                    "Associates": e.associates, 
+                    "Waktu Mulai": e.startTime || '-', 
+                    "Waktu Selesai": e.endTime || 'Masih Berjalan', 
+                    "Durasi (Jam)": e.hours 
+                }));
                 const ws = XLSX.utils.json_to_sheet(data);
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "Timesheet");
@@ -385,8 +479,13 @@
                                             </div>
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div className="space-y-1">
-                                                    <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Durasi (Jam)</label>
-                                                    <input required type="number" step="0.1" value={formData.hours} onChange={e => setFormData({...formData, hours: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm font-bold" placeholder="0.0" />
+                                                    <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Waktu (Mulai - Selesai)</label>
+                                                    <div className="flex gap-2 items-center">
+                                                        <input required type="time" value={formData.startTime} onChange={e => setFormData({...formData, startTime: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm font-bold" />
+                                                        <span className="font-black text-slate-300">-</span>
+                                                        <input type="time" value={formData.endTime} onChange={e => setFormData({...formData, endTime: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm font-bold" />
+                                                    </div>
+                                                    <p className="text-[8px] font-bold text-orange-500 italic ml-1 mt-1">*Selesai opsional (Bisa diisi nanti)</p>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tanggal</label>
@@ -414,11 +513,14 @@
                                             {isSubmitting && <span className="animate-spin-custom w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>}
                                             {isSubmitting ? 'MENYIMPAN...' : 'SIMPAN'}
                                         </button>
-                                        {!user && !isSubmitting && !cloudError && (
-                                            <p className="text-[9px] text-orange-600 font-bold text-center mt-2 animate-pulse uppercase">Menghubungkan ke Cloud...</p>
+                                        {!firebaseReady && !cloudError && (
+                                            <p className="text-[9px] text-orange-600 font-bold text-center mt-2 animate-pulse uppercase">Memuat Konfigurasi Cloud...</p>
+                                        )}
+                                        {firebaseReady && !user && !cloudError && (
+                                            <p className="text-[9px] text-orange-600 font-bold text-center mt-2 animate-pulse uppercase">Menghubungkan ke Akun Anonim...</p>
                                         )}
                                         {cloudError && (
-                                            <p className="text-[9px] text-red-600 font-bold text-center mt-2 uppercase">Koneksi Cloud Terputus</p>
+                                            <p className="text-[9px] text-red-600 font-bold text-center mt-2 uppercase">Koneksi Cloud Ditolak Server</p>
                                         )}
                                     </form>
                                 </div>
@@ -430,15 +532,30 @@
                                         <span className="text-[9px] md:text-[10px] font-black text-slate-400 bg-slate-100 px-3 py-1 rounded-full">{filteredEntries.length} Items</span>
                                     </div>
                                     {filteredEntries.map(entry => (
-                                        <div key={entry.id} className="bg-white p-5 md:p-8 rounded-2xl md:rounded-[3rem] border border-slate-100 shadow-sm flex items-start gap-4 md:gap-6 group relative hover:border-[#2c2a7b]/30 transition-all">
-                                            <div className="bg-[#0f0e32] text-white w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex flex-col items-center justify-center shrink-0 shadow-lg border border-[#232162]">
+                                        <div key={entry.id} className={`bg-white p-5 md:p-8 rounded-2xl md:rounded-[3rem] border shadow-sm flex items-start gap-4 md:gap-6 group relative transition-all ${!entry.endTime ? 'border-orange-300' : 'border-slate-100 hover:border-[#2c2a7b]/30'}`}>
+                                            <div className={`${!entry.endTime ? 'bg-orange-500 border-orange-600 animate-pulse' : 'bg-[#0f0e32] border-[#232162]'} text-white w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex flex-col items-center justify-center shrink-0 shadow-lg border`}>
                                                 <span className="text-lg md:text-xl font-black leading-none">{new Date(entry.date).getDate()}</span>
                                                 <span className="text-[7px] md:text-[8px] uppercase font-black opacity-40">{new Date(entry.date).toLocaleDateString('id-ID', {weekday:'short'})}</span>
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex flex-wrap items-center gap-2 mb-2">
                                                     <span className="text-sm md:text-base font-black text-[#2c2a7b] uppercase truncate max-w-[150px] md:max-w-none">{entry.client}</span>
-                                                    <span className="text-[9px] font-black text-slate-400 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-100">{entry.hours}h</span>
+                                                    
+                                                    {/* Badge Status Waktu */}
+                                                    {entry.endTime ? (
+                                                        <span className="text-[9px] font-black text-slate-400 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-100">
+                                                            {entry.startTime} - {entry.endTime} ({entry.hours}h)
+                                                        </span>
+                                                    ) : (
+                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                            <span className="text-[9px] font-black text-orange-600 bg-orange-50 px-2 py-0.5 rounded-lg border border-orange-200">
+                                                                Mulai: {entry.startTime} (BERJALAN)
+                                                            </span>
+                                                            <button type="button" onClick={() => openFinishModal(entry)} className="bg-[#2c2a7b] text-white text-[9px] px-3 py-1 rounded-full font-black uppercase tracking-wider hover:bg-orange-500 transition-colors shadow-md transform active:scale-95">
+                                                                Selesaikan Sekarang
+                                                            </button>
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 {entry.jobTitle && <p className="text-[11px] font-black text-[#0f0e32] uppercase mb-1">{entry.jobTitle}</p>}
                                                 <p className="text-[13px] md:text-[14px] text-slate-700 font-medium mb-2 leading-relaxed line-clamp-3 md:line-clamp-none">{entry.task}</p>
@@ -462,7 +579,7 @@
                                         <p className="text-slate-400 mt-4 md:mt-8 font-bold text-xs md:text-sm uppercase tracking-[0.4em]">{months[currentMonth]} {currentYear}</p>
                                     </div>
                                     <div className="flex flex-col sm:flex-row lg:flex-col gap-4 w-full sm:w-auto relative z-10">
-                                        <button onClick={exportExcel} className="bg-[#2c2a7b] text-white border border-white/10 px-8 md:px-12 py-4 md:py-5 rounded-2xl md:rounded-[2rem] font-black text-[10px] md:text-xs shadow-xl transition-standard uppercase tracking-[0.2em] w-full">Unduh Excel</button>
+                                        <button onClick={exportExcel} className="bg-[#2c2a7b] text-white border border-white/10 px-8 md:px-12 py-4 md:py-5 rounded-2xl md:rounded-[2rem] font-black text-[10px] md:text-xs shadow-xl transition-standard uppercase tracking-[0.2em] w-full hover:bg-white hover:text-[#2c2a7b]">Unduh Excel</button>
                                     </div>
                                     <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-blue-600 rounded-full blur-[100px] opacity-10"></div>
                                 </div>
@@ -478,7 +595,7 @@
                                                         <th className="px-6 py-8 font-black uppercase text-slate-400 text-[9px] md:text-[10px] tracking-[0.3em]">Pekerjaan</th>
                                                         <th className="px-6 py-8 font-black uppercase text-slate-400 text-[9px] md:text-[10px] tracking-[0.3em]">Detail Pekerjaan</th>
                                                         <th className="px-6 py-8 font-black uppercase text-slate-400 text-[9px] md:text-[10px] tracking-[0.3em]">Associates</th>
-                                                        <th className="px-6 py-8 font-black uppercase text-slate-400 text-[9px] md:text-[10px] tracking-[0.3em] text-right">Jam</th>
+                                                        <th className="px-6 py-8 font-black uppercase text-slate-400 text-[9px] md:text-[10px] tracking-[0.3em] text-right">Waktu & Jam</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-slate-50">
@@ -499,7 +616,12 @@
                                                                             <div className="text-[12px] md:text-[13px] text-slate-600 font-bold leading-relaxed italic">{e.task}</div>
                                                                         </td>
                                                                         <td className="px-6 py-6 text-slate-400 text-[10px] font-black uppercase truncate max-w-[120px]">{e.associates}</td>
-                                                                        <td className="px-6 py-6 text-right font-black text-slate-900 text-lg md:text-xl tracking-tighter whitespace-nowrap">{e.hours.toFixed(1)}h</td>
+                                                                        <td className="px-6 py-6 text-right whitespace-nowrap">
+                                                                            <div className={`font-black ${!e.endTime ? 'text-orange-500 animate-pulse' : 'text-slate-900'} text-lg md:text-xl tracking-tighter`}>{e.hours.toFixed(1)}h</div>
+                                                                            <div className="text-[10px] font-bold text-slate-400 mt-1">
+                                                                                {e.endTime ? `${e.startTime} - ${e.endTime}` : `Mulai: ${e.startTime}`}
+                                                                            </div>
+                                                                        </td>
                                                                     </tr>
                                                                 ))}
                                                             </React.Fragment>
@@ -509,7 +631,6 @@
                                             </table>
                                         </div>
                                     </div>
-                                    {/* Table Footer Placeholder */}
                                     <div className="bg-[#0f0e32] p-6 text-center text-white/20 text-[8px] font-black uppercase tracking-[0.5em]">
                                         End of Report Record
                                     </div>
@@ -525,6 +646,46 @@
                                 <h4 className="font-black mb-3 text-[#0f0e32] text-xl md:text-2xl uppercase italic">Info</h4>
                                 <p className="text-slate-600 text-xs md:text-sm mb-10 leading-relaxed font-bold">{modalMessage}</p>
                                 <button onClick={() => setModalMessage(null)} className="w-full bg-[#0f0e32] text-white font-black text-[10px] py-5 rounded-2xl md:rounded-[2rem] uppercase tracking-widest active:scale-95 transition-all shadow-lg">Tutup</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Finish Task Modal (Opsi ubah waktu) */}
+                    {finishTaskModal && (
+                        <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[1000] flex items-center justify-center p-6 text-center">
+                            <div className="bg-white rounded-[2.5rem] md:rounded-[4rem] p-8 md:p-10 max-w-sm w-full shadow-2xl border border-slate-100 animate-in zoom-in duration-300">
+                                <h4 className="font-black mb-2 text-[#0f0e32] text-xl md:text-2xl uppercase italic">Selesaikan</h4>
+                                <p className="text-slate-500 text-xs md:text-sm mb-6 font-bold truncate">{finishTaskModal.jobTitle || finishTaskModal.client}</p>
+                                
+                                <div className="text-left mb-8">
+                                    <label className="text-[10px] md:text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2 block text-center">Waktu Selesai</label>
+                                    <input 
+                                        type="time" 
+                                        value={finishTimeInput} 
+                                        onChange={(e) => setFinishTimeInput(e.target.value)}
+                                        className="w-full p-4 md:p-5 bg-slate-50 border border-slate-200 rounded-2xl outline-none text-xl md:text-2xl font-black text-center focus:border-[#2c2a7b]" 
+                                    />
+                                    <p className="text-[9px] md:text-[10px] mt-3 text-slate-400 font-bold text-center">Sesuaikan jam jika waktu selesai Anda berbeda dengan jam saat ini.</p>
+                                </div>
+
+                                <div className="flex gap-3">
+                                    <button onClick={() => setFinishTaskModal(null)} className="flex-1 bg-slate-100 text-slate-500 font-black text-[10px] py-4 md:py-5 rounded-2xl uppercase tracking-widest active:scale-95 transition-all">Batal</button>
+                                    <button onClick={submitFinishTask} className="flex-1 bg-[#0f0e32] text-white font-black text-[10px] py-4 md:py-5 rounded-2xl uppercase tracking-widest active:scale-95 transition-all shadow-lg">Simpan</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Confirmation Modal (Hapus/Logout) */}
+                    {confirmAction && (
+                        <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[1000] flex items-center justify-center p-6 text-center">
+                            <div className="bg-white rounded-[2.5rem] md:rounded-[4rem] p-10 md:p-12 max-w-sm w-full shadow-2xl border border-slate-100 animate-in zoom-in duration-300">
+                                <h4 className="font-black mb-3 text-[#0f0e32] text-xl md:text-2xl uppercase italic">Konfirmasi</h4>
+                                <p className="text-slate-600 text-xs md:text-sm mb-10 leading-relaxed font-bold">{confirmAction.message}</p>
+                                <div className="flex gap-3">
+                                    <button onClick={() => setConfirmAction(null)} className="flex-1 bg-slate-100 text-slate-500 font-black text-[10px] py-4 md:py-5 rounded-2xl uppercase tracking-widest active:scale-95 transition-all">Batal</button>
+                                    <button onClick={confirmAction.onConfirm} className="flex-1 bg-red-500 text-white font-black text-[10px] py-4 md:py-5 rounded-2xl uppercase tracking-widest active:scale-95 transition-all shadow-lg">Ya, Lanjutkan</button>
+                                </div>
                             </div>
                         </div>
                     )}
