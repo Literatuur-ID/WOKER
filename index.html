@@ -383,20 +383,62 @@
 
             const exportExcel = () => {
                 if (filteredEntries.length === 0) return;
-                const data = filteredEntries.map(e => ({ 
-                    "Tanggal": e.date, 
-                    "Klien": e.client, 
-                    "Pekerjaan": e.jobTitle || '-', 
-                    "Detail Pekerjaan": e.task, 
-                    "Associates": e.associates, 
-                    "Waktu Mulai": e.startTime || '-', 
-                    "Waktu Selesai": e.endTime || 'Masih Berjalan', 
-                    "Durasi (Jam)": e.hours 
-                }));
-                const ws = XLSX.utils.json_to_sheet(data);
+                
+                // 1. Format Penamaan File: yyyy.mm.dd - [TIMESHEET] Nama User [Bulan]
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                const namaBulan = months[currentMonth];
+                
+                // Menggunakan nama dari input pengguna
+                const safeUserName = userName || 'Paundra Sastra'; 
+                const fileName = `${yyyy}.${mm}.${dd} - [TIMESHEET] ${safeUserName} ${namaBulan}.xlsx`;
+
+                // 2. Menyiapkan Struktur Baris Data Excel agar lebih rapi (Header Tambahan)
+                const wsData = [
+                    ["TIMESHEET REPORT"],
+                    ["NAMA", ":", safeUserName],
+                    ["BULAN", ":", `${namaBulan} ${currentYear}`],
+                    ["KODE ID", ":", accessKey],
+                    [], // Baris Kosong Pemisah
+                    ["TANGGAL", "KLIEN", "PEKERJAAN", "DETAIL PEKERJAAN", "ASSOCIATES", "WAKTU MULAI", "WAKTU SELESAI", "DURASI (JAM)"]
+                ];
+
+                // 3. Memasukkan Data Entri Pekerjaan
+                filteredEntries.forEach(e => {
+                    wsData.push([
+                        e.date,
+                        e.client,
+                        e.jobTitle || '-',
+                        e.task,
+                        e.associates || '-',
+                        e.startTime || '-',
+                        e.endTime || 'Masih Berjalan',
+                        e.hours
+                    ]);
+                });
+
+                // 4. Menambahkan Baris Total Jam di Bawah Tabel
+                wsData.push([]);
+                wsData.push(["", "", "", "", "", "", "TOTAL JAM", totalHours.toFixed(1)]);
+
+                // 5. Konversi dan Atur Lebar Kolom agar rapi saat dibuka
+                const ws = XLSX.utils.aoa_to_sheet(wsData);
+                ws['!cols'] = [
+                    { wch: 12 }, // Tanggal
+                    { wch: 25 }, // Klien
+                    { wch: 25 }, // Pekerjaan
+                    { wch: 50 }, // Detail Pekerjaan
+                    { wch: 20 }, // Associates
+                    { wch: 15 }, // Waktu Mulai
+                    { wch: 15 }, // Waktu Selesai
+                    { wch: 15 }  // Durasi (Jam)
+                ];
+
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "Timesheet");
-                XLSX.writeFile(wb, `WOKER_REPORT_${accessKey}_${months[currentMonth].toUpperCase()}.xlsx`);
+                XLSX.writeFile(wb, fileName);
             };
 
             if (!isLoggedIn) {
