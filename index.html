@@ -148,22 +148,25 @@
             color: var(--text-muted);
             margin: 0 0 var(--sp-1) var(--sp-1);
         }
-        .brand-logo {
+        
+        /* New Logo Component Styles */
+        .brand-icon {
+            display: block;
+            object-fit: cover;
+            margin: 0 auto;
+            /* Menambahkan bayangan putih lembut untuk membuat logo lebih menonjol */
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); 
+            border-radius: 22%;
+        }
+        .brand-text {
             margin: 0;
             font-weight: 900;
             font-style: italic;
             text-transform: uppercase;
-            letter-spacing: -.04em;
+            letter-spacing: 0.15em;
             line-height: 1;
             color: #fff;
-        }
-        .brand-tag {
-            margin: var(--sp-1) 0 0;
-            font-size: 10px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: .35em;
-            color: var(--text-muted);
+            text-align: center;
         }
 
         /* ---------- Inputs ---------- */
@@ -277,9 +280,12 @@
             overflow: hidden; 
         }
         @media(min-width: 900px) { .auth-brand { display: flex; } }
-        .auth-brand-inner { position: relative; z-index: 2; max-width: 500px; margin: 0 auto; text-align: left; }
-        .auth-brand .brand-logo { font-size: 64px; text-align: left; }
-        .auth-brand .brand-tag { font-size: 12px; letter-spacing: 0.4em; opacity: 0.8; margin-top: 10px; color: #cbd5e1; }
+        
+        .auth-brand-inner { position: relative; z-index: 2; max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
+        /* Menambah ukuran logo di desktop login agar lebih jelas dan menyesuaikan bayangannya */
+        .auth-brand-inner .brand-icon { width: 120px; height: 120px; margin: 0 auto 24px; box-shadow: 0 0 25px rgba(255, 255, 255, 0.3); }
+        .auth-brand-inner .brand-text { font-size: 56px; }
+        
         .auth-glow { 
             position: absolute; width: 600px; height: 600px; 
             background: var(--accent); filter: blur(160px); 
@@ -304,9 +310,12 @@
         .auth-top-bar { position: absolute; top: calc(var(--sp-6) + env(safe-area-inset-top)); right: var(--sp-8); display: flex; gap: var(--sp-2); }
         
         .auth-body { max-width: 400px; width: 100%; margin: 0 auto; }
-        .mobile-brand { display: block; text-align: center; margin-bottom: 48px; }
-        .mobile-brand .brand-logo { color: var(--navy-900); font-size: 40px; }
-        [data-theme="dark"] .mobile-brand .brand-logo { color: #fff; }
+        
+        /* Menambah ukuran logo di mobile login agar lebih jelas */
+        .mobile-brand { display: flex; flex-direction: column; align-items: center; margin-bottom: 40px; }
+        .mobile-brand .brand-icon { width: 80px; height: 80px; margin-bottom: 12px; }
+        .mobile-brand .brand-text { color: var(--navy-900); font-size: 32px; }
+        [data-theme="dark"] .mobile-brand .brand-text { color: #fff; }
         @media(min-width: 900px) { .mobile-brand { display: none; } }
 
         .auth-title {
@@ -349,7 +358,7 @@
         .lang-toggle-btn .lucide { font-size: 12px; }
 
         /* =====================================================
-           APP SHELL
+           APP SHELL & HEADER (Redesigned Alignment)
            ===================================================== */
         .app { min-height: 100vh; display: flex; flex-direction: column; padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
 
@@ -366,22 +375,43 @@
             max-width: 1100px;
             margin: 0 auto;
             padding: var(--sp-4) var(--sp-6);
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            grid-template-rows: auto auto;
+            row-gap: var(--sp-5);
+            align-items: center;
+        }
+        .header-inner .brand {
+            grid-column: 2;
+            grid-row: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: var(--sp-3);
+            justify-content: center;
+            gap: 6px;
         }
-        .header-inner .brand-logo { font-size: 22px; }
-        .header-actions { position: absolute; right: var(--sp-6); top: var(--sp-4); display: flex; gap: var(--sp-1); }
-        @media (min-width: 768px) {
-            .header-inner { flex-direction: row; justify-content: space-between; padding: var(--sp-5) var(--sp-8); position: relative; }
-            .header-inner .brand { text-align: left; }
-            .header-inner .brand-logo { font-size: 28px; }
-            .header-actions { position: static; }
+        /* Menambah ukuran logo di header mobile dan menyesuaikan bayangan */
+        .header-inner .brand-icon {
+            width: 42px; height: 42px;
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.25);
         }
-        .header-inner .brand { text-align: center; }
-
+        .header-inner .brand-text {
+            font-size: 15px;
+        }
+        
+        .header-actions {
+            grid-column: 3;
+            grid-row: 1;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: var(--sp-1);
+        }
+        
         .month-nav {
+            grid-column: 1 / -1;
+            grid-row: 2;
+            justify-self: center;
             display: flex;
             align-items: center;
             gap: var(--sp-2);
@@ -409,6 +439,25 @@
         
         .top-action-btn { color: #fff; opacity: 0.7; }
         .top-action-btn:hover { opacity: 1; background: rgba(255,255,255,0.1); }
+
+        @media (min-width: 768px) {
+            .header-inner {
+                padding: var(--sp-5) var(--sp-8);
+                grid-template-columns: 1fr auto 1fr;
+                grid-template-rows: auto;
+                row-gap: 0;
+            }
+            .header-inner .brand {
+                grid-column: 2;
+                gap: 8px;
+            }
+            /* Menambah ukuran logo di header desktop dan menghilangkan bayangan di header desktop agar lebih bersih */
+            .header-inner .brand-icon { width: 50px; height: 50px; box-shadow: none; }
+            .header-inner .brand-text { font-size: 18px; }
+            
+            .month-nav { grid-column: 1; grid-row: 1; justify-self: start; }
+            .header-actions { grid-column: 3; grid-row: 1; justify-self: end; position: static; }
+        }
 
         .app-main { width: 100%; max-width: 1100px; margin: 0 auto; padding: var(--sp-6) var(--sp-4) 0; }
         @media (min-width: 768px) { .app-main { padding: var(--sp-8) var(--sp-8) 0; } }
@@ -695,13 +744,16 @@
            ===================================================== */
         var i18n = {
             id: {
-                appTag: "Work Tracker",
+                appTag: "Woker App",
                 loginTitle: "Hi, Wokers!",
-                loginSub: "Masukkan Kode Rahasia Anda untuk melanjutkan.",
+                loginSub: "Masukkan Kode Unik Anda untuk melanjutkan.",
                 loginPh: "XXX-0000",
                 loginRemember: "Ingat Saya",
                 loginBtn: "Masuk",
-                loginNote: "Anda dapat mengakses akun pada perangkat lain dengan memasukkan kode rahasia yang sama.",
+                btnSignUp: "Sign Up / Buat Kode",
+                signUpTitle: "Cara Membuat Kode Unik",
+                signUpDesc: "Tentukan sendiri rangkaian yang terdiri dari 3 huruf dan 4 angka (contoh: ABC-1234). Ingat dan simpan kode unik ini dengan baik untuk masuk kembali di perangkat Anda yang lain.",
+                loginNote: "Anda dapat mengakses akun pada perangkat lain dengan memasukkan kode unik yang sama.",
                 nameTitle: "Siapa Anda?",
                 nameSub: "Masukkan nama lengkap atau inisial Anda.",
                 namePh: "e.g. Bli Juan",
@@ -768,13 +820,16 @@
                 months: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
             },
             en: {
-                appTag: "Work Tracker",
+                appTag: "Woker App",
                 loginTitle: "Hi, Wokers!",
-                loginSub: "Enter your Secret Code to continue.",
+                loginSub: "Enter your Unique Code to continue.",
                 loginPh: "XXX-0000",
                 loginRemember: "Remember Me",
                 loginBtn: "Log In",
-                loginNote: "You can access your account on other devices by entering the same secret code.",
+                btnSignUp: "Sign Up / Create Code",
+                signUpTitle: "How to Create a Unique Code",
+                signUpDesc: "Determine your own sequence consisting of 3 letters and 4 numbers (e.g., ABC-1234). Remember and save this unique code securely to log in again on your other devices.",
+                loginNote: "You can access your account on other devices by entering the same unique code.",
                 nameTitle: "Who are you?",
                 nameSub: "Enter your full name or initials.",
                 namePh: "e.g. John Doe",
@@ -842,42 +897,42 @@
             }
         };
 
-        function t(key, vars) {
+        var t = function(key, vars) {
             var str = i18n[state.lang][key] || key;
             if (vars) {
                 for (var k in vars) { str = str.replace('{' + k + '}', vars[k]); }
             }
             return str;
-        }
+        };
 
         /* =====================================================
            Helpers
            ===================================================== */
-        function $(sel, el) { return (el || document).querySelector(sel); }
+        var $ = function(sel, el) { return (el || document).querySelector(sel); };
 
-        function esc(v) {
+        var esc = function(v) {
             return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
                 return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
             });
-        }
+        };
 
-        function getCurrentTime() { return new Date().toTimeString().slice(0, 5); }
-        function getToday() { return new Date().toISOString().split('T')[0]; }
+        var getCurrentTime = function() { return new Date().toTimeString().slice(0, 5); };
+        var getToday = function() { return new Date().toISOString().split('T')[0]; };
 
-        function safeCollectionKey(key) {
+        var safeCollectionKey = function(key) {
             return 'data_' + key.trim().toLowerCase().replace(/[^a-z0-9]/g, '_');
-        }
+        };
 
-        function calcHours(startTime, endTime) {
+        var calcHours = function(startTime, endTime) {
             if (!startTime || !endTime) return 0;
             var start = new Date('1970-01-01T' + startTime + ':00');
             var end = new Date('1970-01-01T' + endTime + ':00');
             var diff = end - start;
             if (diff < 0) diff += 24 * 60 * 60 * 1000;
             return parseFloat((diff / 3600000).toFixed(2));
-        }
+        };
 
-        function refreshIcons() { if (window.lucide) window.lucide.createIcons(); }
+        var refreshIcons = function() { if (window.lucide) window.lucide.createIcons(); };
 
         /* =====================================================
            State
@@ -910,30 +965,30 @@
         /* =====================================================
            Derived data
            ===================================================== */
-        function getFilteredEntries() {
+        var getFilteredEntries = function() {
             return state.entries.filter(function (e) {
                 var d = new Date(e.date);
                 return d.getMonth() === state.currentMonth && d.getFullYear() === state.currentYear;
             }).sort(function (a, b) { return new Date(b.date) - new Date(a.date); });
-        }
+        };
 
-        function getGroupedEntries(filtered) {
+        var getGroupedEntries = function(filtered) {
             var groups = {};
             filtered.forEach(function (entry) {
                 if (!groups[entry.client]) groups[entry.client] = [];
                 groups[entry.client].push(entry);
             });
             return Object.entries(groups).sort(function (a, b) { return a[0].localeCompare(b[0]); });
-        }
+        };
 
-        function getTotalHours(filtered) {
+        var getTotalHours = function(filtered) {
             return filtered.reduce(function (sum, e) { return sum + parseFloat(e.hours || 0); }, 0);
-        }
+        };
 
         /* =====================================================
            Theme & Language Toggles
            ===================================================== */
-        function toggleTheme() {
+        var toggleTheme = function() {
             state.dark = !state.dark;
             localStorage.setItem('woker_dark', state.dark);
             if (state.dark) {
@@ -942,18 +997,18 @@
                 document.documentElement.removeAttribute('data-theme');
             }
             refreshIcons();
-        }
+        };
 
-        function toggleLang() {
+        var toggleLang = function() {
             state.lang = state.lang === 'id' ? 'en' : 'id';
             localStorage.setItem('woker_lang', state.lang);
             render(); 
-        }
+        };
 
         /* =====================================================
            Toast & modal primitives
            ===================================================== */
-        function showToast(message, icon) {
+        var showToast = function(message, icon) {
             var rootEl = $('#toast-root');
             if (!rootEl) {
                 rootEl = document.createElement('div');
@@ -970,9 +1025,9 @@
                 toast.classList.remove('show');
                 setTimeout(function () { toast.remove(); }, 300);
             }, 2600);
-        }
+        };
 
-        function openModal(innerHTML, dismissible) {
+        var openModal = function(innerHTML, dismissible) {
             var overlay = document.createElement('div');
             overlay.className = 'modal-overlay';
             overlay.innerHTML = '<div class="modal-panel">' + innerHTML + '</div>';
@@ -985,25 +1040,26 @@
             refreshIcons();
             requestAnimationFrame(function () { overlay.classList.add('open'); });
             return overlay;
-        }
+        };
 
-        function closeModal(overlay) {
+        var closeModal = function(overlay) {
             overlay.classList.remove('open');
             setTimeout(function () { overlay.remove(); }, 200);
-        }
+        };
 
-        function showInfoModal(message) {
+        var showInfoModal = function(message, customTitle) {
+            var title = customTitle || 'Info';
             var overlay = openModal(
                 '<div class="modal-icon"><i data-lucide="info"></i></div>' +
-                '<h4 class="modal-title">Info</h4>' +
+                '<h4 class="modal-title">' + esc(title) + '</h4>' +
                 '<p class="modal-sub">' + esc(message) + '</p>' +
                 '<button class="btn btn-primary btn-block" data-modal-close>' + (state.lang==='id'?'Tutup':'Close') + '</button>',
                 true
             );
             overlay.querySelector('[data-modal-close]').addEventListener('click', function () { closeModal(overlay); });
-        }
+        };
 
-        function showConfirm(message, confirmBtnText, onConfirm) {
+        var showConfirm = function(message, confirmBtnText, onConfirm) {
             var overlay = openModal(
                 '<div class="modal-icon danger"><i data-lucide="alert-triangle"></i></div>' +
                 '<h4 class="modal-title">' + t('modalConfirm') + '</h4>' +
@@ -1018,12 +1074,12 @@
                 closeModal(overlay);
                 onConfirm();
             });
-        }
+        };
 
         /* =====================================================
            Firebase: auth bootstrap + Firestore subscription
            ===================================================== */
-        function bootFirebase() {
+        var bootFirebase = function() {
             if (window.FirebaseServices) { setupAuth(); return; }
             var onReady = function () { setupAuth(); };
             window.addEventListener('firebase-ready', onReady, { once: true });
@@ -1040,9 +1096,9 @@
                     updateConnectionUI();
                 }
             }, 200);
-        }
+        };
 
-        async function setupAuth() {
+        var setupAuth = async function() {
             if (state.authStarted) return;
             state.authStarted = true;
             var fs = window.FirebaseServices;
@@ -1064,9 +1120,9 @@
                 showInfoModal(state.lang === 'id' ? 'Gagal masuk ke layanan Cloud.' : 'Failed to sign in to Cloud services.');
                 updateConnectionUI();
             }
-        }
+        };
 
-        function ensureSubscription() {
+        var ensureSubscription = function() {
             if (!state.firebaseReady || !state.user || !state.isLoggedIn ||
                 !state.accessKey || !state.userName || !window.FirebaseServices) return;
 
@@ -1098,29 +1154,30 @@
                 refreshDynamic();
                 updateConnectionUI();
             });
-        }
+        };
 
         /* =====================================================
            Screen: Login (Redesigned)
            ===================================================== */
-        function renderLogin() {
+        var renderLogin = function() {
             root.innerHTML =
                 '<div class="auth-split">' +
                 '  <div class="auth-brand">' +
                 '    <div class="auth-brand-inner">' +
-                '      <h1 class="brand-logo">Woker</h1>' +
-                '      <p class="brand-tag">' + t('appTag') + '</p>' +
+                '      <img src="./logo.png" alt="Woker Logo" class="brand-icon">' +
+                '      <h1 class="brand-text">WOKER</h1>' +
                 '    </div>' +
                 '    <div class="auth-glow"></div><div class="auth-pattern"></div>' +
                 '  </div>' +
                 '  <div class="auth-form-wrap">' +
                 '    <div class="auth-top-bar">' +
                 '      <button class="lang-toggle-btn" id="lang-toggle-login"><i data-lucide="globe"></i> ' + (state.lang === 'id' ? 'EN' : 'ID') + '</button>' +
+                '      <button class="lang-toggle-btn" id="theme-toggle-login"><i data-lucide="moon"></i></button>' +
                 '    </div>' +
                 '    <div class="auth-body">' +
                 '      <div class="mobile-brand">' +
-                '        <h1 class="brand-logo">Woker</h1>' +
-                '        <p class="brand-tag">' + t('appTag') + '</p>' +
+                '        <img src="./logo.png" alt="Woker Logo" class="brand-icon">' +
+                '        <h1 class="brand-text">WOKER</h1>' +
                 '      </div>' +
                 '      <h2 class="auth-title">' + t('loginTitle') + '</h2>' +
                 '      <p class="auth-sub">' + t('loginSub') + '</p>' +
@@ -1132,8 +1189,11 @@
                 '          <span>' + t('loginRemember') + '</span>' +
                 '        </label>' +
                 '        <div>' +
-                '          <button type="submit" id="login-btn" class="btn primary btn-block" disabled>' +
+                '          <button type="submit" id="login-btn" class="btn btn-primary btn-block" disabled>' +
                              t('loginBtn') + ' <i data-lucide="arrow-right"></i>' +
+                '          </button>' +
+                '          <button type="button" id="signup-btn" class="btn btn-ghost btn-block" style="margin-top: 12px; font-size: 10px;">' +
+                             t('btnSignUp') +
                 '          </button>' +
                 '          <p class="auth-note">' + t('loginNote') + '</p>' +
                 '        </div>' +
@@ -1143,6 +1203,11 @@
                 '</div>';
 
             $('#lang-toggle-login').addEventListener('click', toggleLang);
+            $('#theme-toggle-login').addEventListener('click', toggleTheme);
+
+            $('#signup-btn').addEventListener('click', function() {
+                showInfoModal(t('signUpDesc'), t('signUpTitle'));
+            });
 
             var input = $('#login-code');
             var button = $('#login-btn');
@@ -1169,16 +1234,18 @@
 
             refreshIcons();
             input.focus();
-        }
+        };
 
         /* =====================================================
            Screen: Name setup
            ===================================================== */
-        function renderName() {
+        var renderName = function() {
             root.innerHTML =
                 '<div class="auth-split" style="flex-direction:column; justify-content:center; align-items:center; background: var(--bg);">' +
                 '  <div style="max-width:400px; width:100%; text-align:center; padding:var(--sp-6)">' +
-                '    <h1 class="brand-logo" style="color:var(--text); font-size:48px; margin-bottom:var(--sp-2)">Woker</h1>' +
+                /* Menambah ukuran logo di halaman setup nama */
+                '    <img src="./logo.png" alt="Woker Logo" class="brand-icon" style="width: 90px; height: 90px; margin: 0 auto 16px;">' +
+                '    <h1 class="brand-text" style="color:var(--text); font-size:38px; margin-bottom:var(--sp-2)">WOKER</h1>' +
                 '    <h2 class="auth-title" style="margin-top:var(--sp-8)">' + t('nameTitle') + '</h2>' +
                 '    <p class="auth-sub" style="font-style:italic">' + t('nameSub') + '</p>' +
                 '    <form id="name-form" class="auth-form">' +
@@ -1201,19 +1268,19 @@
 
             refreshIcons();
             $('#name-input').focus();
-        }
+        };
 
         /* =====================================================
            Screen: Main app
            ===================================================== */
-        function renderApp() {
+        var renderApp = function() {
             root.innerHTML =
                 '<div class="app">' +
                 '  <header class="app-header">' +
                 '    <div class="header-inner">' +
                 '      <div class="brand">' +
-                '        <h1 class="brand-logo">Woker</h1>' +
-                '        <p class="brand-tag">' + t('appTag') + '</p>' +
+                '        <img src="./logo.png" alt="Woker Logo" class="brand-icon">' +
+                '        <h1 class="brand-text">WOKER</h1>' +
                 '      </div>' +
                 '      <nav class="month-nav">' +
                 '        <button type="button" class="month-btn" id="prev-month"><i data-lucide="chevron-left"></i></button>' +
@@ -1307,9 +1374,9 @@
             renderReport();
             setActiveTab(state.activeTab);
             refreshIcons();
-        }
+        };
 
-        function bindAppEvents() {
+        var bindAppEvents = function() {
             $('#app-theme-toggle').addEventListener('click', toggleTheme);
             $('#app-lang-toggle').addEventListener('click', toggleLang);
 
@@ -1356,24 +1423,24 @@
             $('#tab-rekap').addEventListener('click', function (e) {
                 if (e.target.closest('#export-btn')) exportExcel();
             });
-        }
+        };
 
-        function setActiveTab(tab) {
+        var setActiveTab = function(tab) {
             state.activeTab = tab;
             $('#tab-input').hidden = tab !== 'input';
             $('#tab-rekap').hidden = tab !== 'rekap';
             $('#tab-btn-input').classList.toggle('active', tab === 'input');
             $('#tab-btn-rekap').classList.toggle('active', tab === 'rekap');
-        }
+        };
 
-        function updateMonthLabel() {
+        var updateMonthLabel = function() {
             var nameEl = $('#month-name');
             if (!nameEl) return;
             nameEl.textContent = i18n[state.lang].months[state.currentMonth];
             $('#month-year').textContent = state.currentYear;
-        }
+        };
 
-        function updateStatusBar() {
+        var updateStatusBar = function() {
             var bar = $('#status-bar');
             if (!bar) return;
             var dotClass = state.cloudError ? 'error' : (!state.user || state.isCloudSyncing) ? 'busy' : 'ok';
@@ -1387,9 +1454,9 @@
                 '</div>' +
                 '<button type="button" id="logout-btn" class="btn-logout"><i data-lucide="log-out"></i> ' + (state.lang==='id'?'Keluar':'Log Out') + '</button>';
             refreshIcons();
-        }
+        };
 
-        function updateConnectionUI() {
+        var updateConnectionUI = function() {
             var el = $('#form-status');
             if (el) {
                 if (state.cloudError) {
@@ -1404,10 +1471,10 @@
                 }
             }
             updateStatusBar();
-        }
+        };
 
         /* ---------- Entry list ---------- */
-        function entryCardHTML(entry) {
+        var entryCardHTML = function(entry) {
             var d = new Date(entry.date);
             var day = isNaN(d) ? '?' : d.getDate();
             var weekday = isNaN(d) ? '' : d.toLocaleDateString(state.lang === 'id' ? 'id-ID' : 'en-US', { weekday: 'short' });
@@ -1445,9 +1512,9 @@
                 '  </div>' +
                 '</article>'
             );
-        }
+        };
 
-        function renderEntryList() {
+        var renderEntryList = function() {
             var listEl = $('#entry-list');
             if (!listEl) return;
             var filtered = getFilteredEntries();
@@ -1475,10 +1542,10 @@
 
             listEl.innerHTML = filtered.map(entryCardHTML).join('');
             refreshIcons();
-        }
+        };
 
         /* ---------- Report tab ---------- */
-        function renderReport() {
+        var renderReport = function() {
             var hero = $('#report-hero');
             var tableCard = $('#report-table');
             if (!hero || !tableCard) return;
@@ -1559,18 +1626,18 @@
                 '</div>' +
                 '<div class="report-footer">' + t('endReport') + '</div>';
             refreshIcons();
-        }
+        };
 
-        function refreshDynamic() {
+        var refreshDynamic = function() {
             renderEntryList();
             renderReport();
             updateStatusBar();
-        }
+        };
 
         /* =====================================================
            Actions
            ===================================================== */
-        function setSubmitting(on) {
+        var setSubmitting = function(on) {
             state.isSubmitting = on;
             var btn = $('#submit-btn');
             if (!btn) return;
@@ -1579,9 +1646,9 @@
                 ? '<span class="spinner"></span> ' + t('btnSaving')
                 : '<i data-lucide="save"></i> ' + t('btnSave');
             refreshIcons();
-        }
+        };
 
-        async function handleSubmit(e) {
+        var handleSubmit = async function(e) {
             e.preventDefault();
             if (state.isSubmitting) return;
             if (!state.user || !state.firebaseReady) {
@@ -1628,9 +1695,9 @@
             } finally {
                 setSubmitting(false);
             }
-        }
+        };
 
-        function openFinishModal(entry) {
+        var openFinishModal = function(entry) {
             var overlay = openModal(
                 '<div class="modal-icon"><i data-lucide="check-circle-2"></i></div>' +
                 '<h4 class="modal-title">' + t('modalFinish') + '</h4>' +
@@ -1692,9 +1759,9 @@
                     showInfoModal(t('syncErr'));
                 }
             });
-        }
+        };
 
-        function openEditModal(entry) {
+        var openEditModal = function(entry) {
             var overlay = openModal(
                 '<div class="modal-icon"><i data-lucide="pencil-line"></i></div>' +
                 '<h4 class="modal-title">' + t('modalEdit') + '</h4>' +
@@ -1773,9 +1840,9 @@
                     showInfoModal(t('syncErr'));
                 }
             });
-        }
+        };
 
-        function handleDelete(id) {
+        var handleDelete = function(id) {
             showConfirm(t('modalDeleteTxt'), t('modalDeleteBtn'), async function () {
                 var fs = window.FirebaseServices;
                 try {
@@ -1785,9 +1852,9 @@
                     showInfoModal(t('syncErr'));
                 }
             });
-        }
+        };
 
-        function handleLogout() {
+        var handleLogout = function() {
             showConfirm(t('modalLogoutTxt'), t('modalLogoutBtn'), function () {
                 localStorage.removeItem('woker_access_key');
                 localStorage.removeItem('woker_user_name');
@@ -1801,10 +1868,10 @@
                 state.activeTab = 'input';
                 render();
             });
-        }
+        };
 
         /* ---------- Excel export (Multi-Month) ---------- */
-        function exportExcel() {
+        var exportExcel = function() {
             if (state.entries.length === 0) {
                 showToast(t('exportEmpty'), 'alert-circle');
                 return;
@@ -1880,16 +1947,16 @@
 
             XLSX.writeFile(wb, fileName);
             showToast(t('exportSuccess'), 'download');
-        }
+        };
 
         /* =====================================================
            Router + init
            ===================================================== */
-        function render() {
+        var render = function() {
             if (!state.isLoggedIn) { renderLogin(); return; }
             if (!state.userName) { renderName(); return; }
             renderApp();
-        }
+        };
 
         render();
         bootFirebase();
