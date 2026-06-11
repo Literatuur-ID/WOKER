@@ -2,10 +2,19 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#0f0e32">
-    <title>WOKER - Work Tracker for Lawyers</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f0e32'/%3E%3Ctext x='32' y='44' font-family='Arial Black,Arial' font-size='32' font-style='italic' font-weight='900' fill='white' text-anchor='middle'%3EW%3C/text%3E%3C/svg%3E">
+    
+    <!-- 1. Judul Website -->
+    <title>Woker</title>
+
+    <!-- 2. Pengaturan Icon dan iOS Web App (PWA) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Woker">
+    <link rel="icon" type="image/png" href="./logo.png">
+    <link rel="apple-touch-icon" href="./logo.png">
+    <link rel="shortcut icon" href="./logo.png">
 
     <!-- Libraries: spreadsheet export + icon set -->
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
@@ -685,7 +694,7 @@
            ===================================================== */
         var i18n = {
             id: {
-                appTag: "Work Tracker for Lawyers",
+                appTag: "Work Tracker",
                 loginTitle: "Hi, Wokers!",
                 loginSub: "Masukkan Kode Rahasia Anda untuk melanjutkan.",
                 loginPh: "XXX-0000",
@@ -758,7 +767,7 @@
                 months: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
             },
             en: {
-                appTag: "Work Tracker for Lawyers",
+                appTag: "Work Tracker",
                 loginTitle: "Hi, Wokers!",
                 loginSub: "Enter your Secret Code to continue.",
                 loginPh: "XXX-0000",
@@ -1122,7 +1131,7 @@
                 '          <span>' + t('loginRemember') + '</span>' +
                 '        </label>' +
                 '        <div>' +
-                '          <button type="submit" id="login-btn" class="btn btn-primary btn-block" disabled>' +
+                '          <button type="submit" id="login-btn" class="btn primary btn-block" disabled>' +
                              t('loginBtn') + ' <i data-lucide="arrow-right"></i>' +
                 '          </button>' +
                 '          <p class="auth-note">' + t('loginNote') + '</p>' +
