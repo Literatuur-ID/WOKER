@@ -298,10 +298,10 @@
             display: flex; flex-direction: column; justify-content: center; 
             background: var(--card); position: relative; 
             box-shadow: -20px 0 50px rgba(0,0,0,0.1); 
-            padding: var(--sp-10) var(--sp-6);
+            padding: calc(var(--sp-10) + env(safe-area-inset-top)) var(--sp-6) var(--sp-10);
         }
         [data-theme="dark"] .auth-form-wrap { box-shadow: -20px 0 50px rgba(0,0,0,0.5); }
-        .auth-top-bar { position: absolute; top: var(--sp-6); right: var(--sp-8); display: flex; gap: var(--sp-2); }
+        .auth-top-bar { position: absolute; top: calc(var(--sp-6) + env(safe-area-inset-top)); right: var(--sp-8); display: flex; gap: var(--sp-2); }
         
         .auth-body { max-width: 400px; width: 100%; margin: 0 auto; }
         .mobile-brand { display: block; text-align: center; margin-bottom: 48px; }
@@ -351,7 +351,7 @@
         /* =====================================================
            APP SHELL
            ===================================================== */
-        .app { min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 80px; }
+        .app { min-height: 100vh; display: flex; flex-direction: column; padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
 
         .app-header {
             background: var(--navy-900);
@@ -360,6 +360,7 @@
             position: sticky;
             top: 0;
             z-index: 50;
+            padding-top: env(safe-area-inset-top);
         }
         .header-inner {
             max-width: 1100px;
