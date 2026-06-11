@@ -2,39 +2,1891 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WOKER - Work Tracker for Lawyer</title>
-    
-    <!-- Script Loaders -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f0e32">
+    <title>WOKER - Work Tracker for Lawyers</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f0e32'/%3E%3Ctext x='32' y='44' font-family='Arial Black,Arial' font-size='32' font-style='italic' font-weight='900' fill='white' text-anchor='middle'%3EW%3C/text%3E%3C/svg%3E">
+
+    <!-- Libraries: spreadsheet export + icon set -->
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
-    
-    <style>
-        :root {
-            --midnight-1: #2c2a7b;
-            --midnight-2: #232162;
-            --midnight-3: #1b194f;
-            --midnight-4: #161440;
-            --midnight-5: #0f0e32;
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+    <!-- Pre-load Dark Theme Script to avoid flash -->
+    <script>
+        if (localStorage.getItem('woker_dark') === 'true') {
+            document.documentElement.setAttribute('data-theme', 'dark');
         }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            background-color: #fcfcfd; 
-            color: #1e293b;
+    </script>
+
+    <style>
+        /* =====================================================
+           WOKER DESIGN TOKENS
+           ===================================================== */
+        :root {
+            /* Brand navy scale (darkest -> lightest) */
+            --navy-950: #0a0926;
+            --navy-900: #0f0e32;   
+            --navy-800: #161440;
+            --navy-700: #1b194f;
+            --navy-600: #232162;
+            --navy-500: #2c2a7b;   
+
+            --accent: var(--navy-500);
+            --accent-soft: #f0f4ff;
+            --accent-border: #c7d2fe;
+
+            /* Neutral surfaces & text - LIGHT MODE (Default) */
+            --bg: #fcfcfd;
+            --card: #ffffff;
+            --surface: #f8fafc;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --text: #1e293b;
+            --text-soft: #475569;
+            --text-muted: #94a3b8;
+            --text-faint: #cbd5e1;
+
+            /* Semantic colors */
+            --success: #10b981;
+            --info: #3b82f6;
+            --warning: #f97316;
+            --warning-soft: #fff7ed;
+            --warning-border: #fed7aa;
+            --danger: #ef4444;
+            --danger-soft: #fef2f2;
+
+            /* Spacing scale */
+            --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+            --sp-5: 20px; --sp-6: 24px; --sp-8: 32px; --sp-10: 40px;
+
+            /* Radii */
+            --r-sm: 10px; --r-md: 14px; --r-lg: 20px;
+            --r-xl: 28px; --r-2xl: 36px; --r-pill: 999px;
+
+            /* Elevation */
+            --shadow-sm: 0 1px 3px rgb(15 14 50 / .06);
+            --shadow-md: 0 4px 20px -5px rgb(15 14 50 / .12);
+            --shadow-lg: 0 20px 50px -20px rgb(15 14 50 / .35);
+            --shadow-2xl: 0 25px 50px -12px rgb(15 14 50 / .25);
+
+            /* Typography */
+            --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --track: .18em;
+
+            --ease: cubic-bezier(.4, 0, .2, 1);
+        }
+
+        /* DARK MODE OVERRIDES - Premium, rich dark indigo palette */
+        [data-theme="dark"] {
+            --bg: #090a0f;
+            --card: #11131c;
+            --surface: #181b28;
+            --border: #262a3d;
+            --border-light: #1c1f2e;
+            --text: #f8fafc;
+            --text-soft: #cbd5e1;
+            --text-muted: #64748b;
+            --text-faint: #475569;
+            
+            --navy-950: #050608;
+            --navy-900: #0a0c12; 
+            --navy-800: #12151e;
+            
+            --accent: #6366f1;
+            --accent-soft: rgba(99, 102, 241, 0.15);
+            --accent-border: rgba(99, 102, 241, 0.3);
+
+            --warning-soft: rgba(249, 115, 22, 0.15);
+            --warning-border: rgba(249, 115, 22, 0.3);
+            
+            --danger-soft: rgba(239, 68, 68, 0.15);
+
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.5);
+            --shadow-md: 0 4px 20px -5px rgba(0,0,0,0.6);
+            --shadow-lg: 0 20px 50px -20px rgba(0,0,0,0.7);
+            --shadow-2xl: 0 25px 50px -12px rgba(0,0,0,0.8);
+        }
+
+        /* ---------- Base ---------- */
+        *, *::before, *::after { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
             -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+            transition: background 0.3s var(--ease), color 0.3s var(--ease);
         }
-        .legal-card { 
-            box-shadow: 0 4px 20px -5px rgb(0 0 0 / 0.1); 
-            border: 1px solid #f1f5f9;
+        input, textarea, select, button { font-family: var(--font); font-size: 16px; }
+        img, svg { display: block; }
+
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: var(--surface); }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: var(--r-pill); }
+
+        .lucide { width: 1em; height: 1em; stroke-width: 2.4; }
+
+        /* ---------- Shared text styles ---------- */
+        .label {
+            display: block;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: var(--track);
+            color: var(--text-muted);
+            margin: 0 0 var(--sp-1) var(--sp-1);
+        }
+        .brand-logo {
+            margin: 0;
+            font-weight: 900;
+            font-style: italic;
+            text-transform: uppercase;
+            letter-spacing: -.04em;
+            line-height: 1;
+            color: #fff;
+        }
+        .brand-tag {
+            margin: var(--sp-1) 0 0;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .35em;
+            color: var(--text-muted);
+        }
+
+        /* ---------- Inputs ---------- */
+        .field { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+        .field input, .field textarea {
+            width: 100%;
+            padding: 14px var(--sp-4);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r-md);
+            font-weight: 700;
+            color: var(--text);
+            outline: none;
+            transition: border-color .2s var(--ease), box-shadow .2s var(--ease), background .2s var(--ease), color .2s var(--ease);
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        .field input::placeholder, .field textarea::placeholder { color: var(--text-faint); font-weight: 600; }
+        .field input:focus, .field textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+        .field textarea { min-height: 120px; resize: vertical; font-weight: 500; line-height: 1.6; }
+        .input-optional { background: var(--accent-soft) !important; border-color: var(--accent-border) !important; color: var(--accent) !important; }
+        .hint-optional { margin: 2px 0 0 var(--sp-1); font-size: 9px; font-weight: 800; font-style: italic; color: var(--warning); }
+        .field-row { display: flex; gap: var(--sp-4); }
+        .field-row .field { flex: 1; }
+        @media (max-width: 480px) { .field-row { flex-direction: column; } }
+
+        /* ---------- Buttons ---------- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--sp-2);
+            border: none;
+            cursor: pointer;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: var(--track);
+            font-size: 11px;
+            padding: var(--sp-4) var(--sp-6);
+            border-radius: var(--r-md);
+            transition: background .2s var(--ease), color .2s var(--ease), transform .15s var(--ease), box-shadow .2s var(--ease);
+            user-select: none;
+        }
+        .btn:active { transform: scale(.97); }
+        .btn:disabled { cursor: not-allowed; transform: none; }
+        .btn .lucide { font-size: 15px; }
+
+        .btn-primary { background: var(--navy-900); color: #fff; box-shadow: var(--shadow-md); }
+        .btn-primary:hover { background: var(--navy-800); }
+        .btn-primary:disabled { background: var(--border-light); color: var(--text-faint); box-shadow: none; }
+        [data-theme="dark"] .btn-primary { background: var(--accent); }
+        [data-theme="dark"] .btn-primary:hover { background: #4f46e5; }
+        [data-theme="dark"] .btn-primary:disabled { background: var(--surface); }
+
+        .btn-ghost { background: var(--border-light); color: var(--text-soft); }
+        .btn-ghost:hover { background: var(--border); }
+
+        .btn-danger { background: var(--danger); color: #fff; box-shadow: var(--shadow-md); }
+        .btn-danger:hover { background: #dc2626; }
+
+        .btn-block { width: 100%; padding-top: 18px; padding-bottom: 18px; }
+
+        .icon-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: var(--sp-2);
+            border-radius: var(--r-sm);
+            color: var(--text-faint);
+            transition: color .2s var(--ease), background .2s var(--ease);
+        }
+        .icon-btn .lucide { font-size: 18px; }
+
+        .spinner {
+            width: 15px; height: 15px;
+            border: 2px solid currentColor;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            flex-shrink: 0;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .animate-spin-custom { animation: spin 1s linear infinite; }
+
+        /* ---------- Cards ---------- */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--r-xl);
+            box-shadow: var(--shadow-md);
+            transition: background 0.3s var(--ease), border-color 0.3s var(--ease);
+        }
+
+        /* =====================================================
+           AUTH SCREENS (Redesigned Split Layout)
+           ===================================================== */
+        .auth-split { display: flex; min-height: 100vh; min-height: 100dvh; background: var(--bg); }
+        .auth-brand { 
+            flex: 1; 
+            background: linear-gradient(135deg, var(--navy-950) 0%, var(--navy-800) 100%); 
+            display: none; 
+            flex-direction: column; 
+            justify-content: center; 
+            padding: var(--sp-10); 
+            position: relative; 
+            overflow: hidden; 
+        }
+        @media(min-width: 900px) { .auth-brand { display: flex; } }
+        .auth-brand-inner { position: relative; z-index: 2; max-width: 500px; margin: 0 auto; text-align: left; }
+        .auth-brand .brand-logo { font-size: 64px; text-align: left; }
+        .auth-brand .brand-tag { font-size: 12px; letter-spacing: 0.4em; opacity: 0.8; margin-top: 10px; color: #cbd5e1; }
+        .auth-glow { 
+            position: absolute; width: 600px; height: 600px; 
+            background: var(--accent); filter: blur(160px); 
+            opacity: 0.15; border-radius: 50%; 
+            bottom: -200px; left: -100px; pointer-events: none; 
+        }
+        .auth-pattern {
+            position: absolute; inset: 0;
+            background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 24px 24px;
+            opacity: 0.4; pointer-events: none;
+        }
         
-        /* Smooth Scrollbar */
+        .auth-form-wrap { 
+            flex: 1; max-width: 650px; width: 100%; margin: 0 auto;
+            display: flex; flex-direction: column; justify-content: center; 
+            background: var(--card); position: relative; 
+            box-shadow: -20px 0 50px rgba(0,0,0,0.1); 
+            padding: var(--sp-10) var(--sp-6);
+        }
+        [data-theme="dark"] .auth-form-wrap { box-shadow: -20px 0 50px rgba(0,0,0,0.5); }
+        .auth-top-bar { position: absolute; top: var(--sp-6); right: var(--sp-8); display: flex; gap: var(--sp-2); }
+        
+        .auth-body { max-width: 400px; width: 100%; margin: 0 auto; }
+        .mobile-brand { display: block; text-align: center; margin-bottom: 48px; }
+        .mobile-brand .brand-logo { color: var(--navy-900); font-size: 40px; }
+        [data-theme="dark"] .mobile-brand .brand-logo { color: #fff; }
+        @media(min-width: 900px) { .mobile-brand { display: none; } }
+
+        .auth-title {
+            margin: 0 0 var(--sp-2); font-size: 32px; font-weight: 900;
+            text-transform: uppercase; letter-spacing: -.03em; color: var(--text);
+        }
+        .auth-sub { margin: 0 0 var(--sp-10); font-size: 14px; font-weight: 600; color: var(--text-muted); line-height: 1.5; }
+        
+        .auth-form { display: flex; flex-direction: column; gap: var(--sp-6); }
+        .code-input {
+            width: 100%; padding: var(--sp-5); background: var(--surface);
+            border: 2px solid var(--border-light); border-radius: var(--r-lg);
+            outline: none; font-size: 24px; font-weight: 900; text-align: center;
+            text-transform: uppercase; letter-spacing: .25em; color: var(--text);
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.02);
+            transition: border-color .2s var(--ease), background .2s var(--ease);
+        }
+        .code-input:focus { border-color: var(--accent); }
+        .code-input.invalid { border-color: var(--danger); }
+        .remember {
+            display: flex; align-items: center; justify-content: center; gap: var(--sp-3);
+            cursor: pointer; font-size: 11px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: var(--track); color: var(--text-muted);
+        }
+        .remember input { width: 18px; height: 18px; accent-color: var(--accent); }
+        .auth-note {
+            margin: var(--sp-6) 0 0; font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .1em; line-height: 1.8;
+            text-align: center; color: var(--text-faint);
+        }
+
+        .lang-toggle-btn {
+            background: var(--surface); color: var(--text-soft);
+            border: 1px solid var(--border); border-radius: var(--r-pill);
+            padding: 6px 14px; font-size: 10px; font-weight: 900;
+            cursor: pointer; transition: all 0.2s var(--ease);
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .lang-toggle-btn:hover { background: var(--border-light); color: var(--text); }
+        .lang-toggle-btn .lucide { font-size: 12px; }
+
+        /* =====================================================
+           APP SHELL
+           ===================================================== */
+        .app { min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 80px; }
+
+        .app-header {
+            background: var(--navy-900);
+            border-bottom: 1px solid var(--navy-600);
+            box-shadow: var(--shadow-lg);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .header-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: var(--sp-4) var(--sp-6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--sp-3);
+        }
+        .header-inner .brand-logo { font-size: 22px; }
+        .header-actions { position: absolute; right: var(--sp-6); top: var(--sp-4); display: flex; gap: var(--sp-1); }
+        @media (min-width: 768px) {
+            .header-inner { flex-direction: row; justify-content: space-between; padding: var(--sp-5) var(--sp-8); position: relative; }
+            .header-inner .brand { text-align: left; }
+            .header-inner .brand-logo { font-size: 28px; }
+            .header-actions { position: static; }
+        }
+        .header-inner .brand { text-align: center; }
+
+        .month-nav {
+            display: flex;
+            align-items: center;
+            gap: var(--sp-2);
+            background: var(--navy-800);
+            border: 1px solid var(--navy-600);
+            border-radius: var(--r-pill);
+            padding: 6px var(--sp-3);
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.25);
+        }
+        .month-btn {
+            background: none; border: none; cursor: pointer;
+            color: #fff; padding: var(--sp-2);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            transition: background .2s var(--ease), color .2s var(--ease);
+        }
+        .month-btn:hover { background: rgba(255,255,255,0.1); color: var(--info); }
+        .month-btn .lucide { font-size: 18px; }
+        .month-label { text-align: center; min-width: 130px; line-height: 1.2; }
+        .month-name {
+            display: block; color: #fff; font-size: 14px;
+            font-weight: 900; text-transform: uppercase; letter-spacing: var(--track);
+        }
+        .month-year { display: block; font-size: 10px; font-weight: 700; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+        
+        .top-action-btn { color: #fff; opacity: 0.7; }
+        .top-action-btn:hover { opacity: 1; background: rgba(255,255,255,0.1); }
+
+        .app-main { width: 100%; max-width: 1100px; margin: 0 auto; padding: var(--sp-6) var(--sp-4) 0; }
+        @media (min-width: 768px) { .app-main { padding: var(--sp-8) var(--sp-8) 0; } }
+
+        /* ---------- Status bar ---------- */
+        .status-bar {
+            display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3);
+            background: var(--card); border: 1px solid var(--border-light);
+            border-radius: var(--r-lg); box-shadow: var(--shadow-sm);
+            padding: var(--sp-3) var(--sp-5); margin-bottom: var(--sp-6);
+            font-size: 11px; font-weight: 900; text-transform: uppercase;
+            letter-spacing: .12em; overflow: hidden;
+            transition: background 0.3s var(--ease), border-color 0.3s var(--ease);
+        }
+        .status-left { display: flex; align-items: center; gap: var(--sp-3); min-width: 0; }
+        .sync-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .sync-dot.ok { background: var(--success); box-shadow: 0 0 0 3px rgba(16,185,129,0.15); }
+        .sync-dot.busy { background: var(--info); animation: pulse 1.4s ease-in-out infinite; }
+        .sync-dot.error { background: var(--danger); box-shadow: 0 0 0 3px rgba(239,68,68,0.15); }
+        @keyframes pulse { 50% { opacity: .35; } }
+        .status-name { color: var(--text); display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .status-name .lucide { font-size: 13px; color: var(--text-muted); }
+        .status-sep { color: var(--border); }
+        .status-id { color: var(--text-muted); white-space: nowrap; }
+        @media (max-width: 560px) { .status-sep, .status-id { display: none; } }
+        .btn-logout {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: none; border: none; cursor: pointer; color: var(--danger);
+            font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .12em;
+            padding: var(--sp-2) var(--sp-3); border-radius: var(--r-sm);
+            transition: background .2s var(--ease); flex-shrink: 0;
+        }
+        .btn-logout:hover { background: var(--danger-soft); }
+        .btn-logout .lucide { font-size: 13px; }
+
+        /* ---------- Tabs ---------- */
+        .tabs {
+            display: flex; background: var(--card); border: 1px solid var(--border-light);
+            border-radius: var(--r-lg); box-shadow: var(--shadow-sm);
+            padding: var(--sp-1); margin-bottom: var(--sp-8);
+        }
+        .tab-btn {
+            flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2);
+            border: none; background: none; cursor: pointer; padding: var(--sp-3) var(--sp-4);
+            border-radius: var(--r-md); font-size: 11px; font-weight: 900;
+            text-transform: uppercase; letter-spacing: var(--track); color: var(--text-muted);
+            transition: background .25s var(--ease), color .25s var(--ease), box-shadow .25s var(--ease);
+        }
+        .tab-btn .lucide { font-size: 14px; }
+        .tab-btn.active { background: var(--navy-900); color: #fff; box-shadow: var(--shadow-md); }
+        [data-theme="dark"] .tab-btn.active { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+
+        /* =====================================================
+           INPUT TAB: form + history
+           ===================================================== */
+        .work-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-8); align-items: start; }
+        @media (min-width: 1024px) {
+            .work-grid { grid-template-columns: 5fr 7fr; gap: var(--sp-10); }
+            .form-col { position: sticky; top: 132px; }
+            .list-col { max-height: calc(100vh - 150px); overflow-y: auto; padding: 0 var(--sp-2) var(--sp-4) 0; }
+        }
+
+        .entry-form {
+            padding: var(--sp-8) var(--sp-6);
+            border-top: 6px solid var(--accent);
+            display: flex; flex-direction: column; gap: var(--sp-4);
+        }
+        @media (min-width: 768px) { .entry-form { padding: var(--sp-10) var(--sp-8); } }
+        .form-title {
+            margin: 0; padding-bottom: var(--sp-4); border-bottom: 1px solid var(--border-light);
+            font-size: 15px; font-weight: 900; font-style: italic; text-transform: uppercase;
+            letter-spacing: -.02em; color: var(--text); display: flex; align-items: center; gap: var(--sp-2);
+        }
+        .form-title .lucide { font-size: 16px; color: var(--accent); }
+        .form-status { margin: 0; min-height: 14px; text-align: center; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; }
+        .form-status.is-loading { color: var(--warning); animation: pulse 1.4s ease-in-out infinite; }
+        .form-status.is-error { color: var(--danger); }
+
+        .list-head { display: flex; align-items: center; justify-content: space-between; padding: 0 var(--sp-4); margin-bottom: var(--sp-4); }
+        .list-title { margin: 0; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .3em; color: var(--text); }
+        .count-badge { font-size: 10px; font-weight: 900; color: var(--text-muted); background: var(--border-light); padding: var(--sp-1) var(--sp-3); border-radius: var(--r-pill); }
+
+        .entry-list { display: flex; flex-direction: column; gap: var(--sp-4); }
+        .entry-card {
+            display: flex; align-items: flex-start; gap: var(--sp-4);
+            background: var(--card); border: 1px solid var(--border-light);
+            border-radius: var(--r-lg); box-shadow: var(--shadow-sm);
+            padding: var(--sp-5); transition: border-color .25s var(--ease), box-shadow .25s var(--ease), transform .25s var(--ease);
+        }
+        .entry-card:hover { border-color: rgba(99, 102, 241, 0.3); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+        .entry-card.is-running { border-color: var(--warning-border); }
+
+        .date-badge {
+            width: 52px; height: 52px; flex-shrink: 0; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; border-radius: var(--r-md);
+            background: var(--navy-900); border: 1px solid var(--navy-600); color: #fff; box-shadow: var(--shadow-md);
+        }
+        [data-theme="dark"] .date-badge { background: var(--surface); border-color: var(--border); }
+        .entry-card.is-running .date-badge { background: var(--warning); border-color: #ea580c; animation: pulse 1.6s ease-in-out infinite; }
+        [data-theme="dark"] .entry-card.is-running .date-badge { background: rgba(249,115,22,0.2); color: var(--warning); border-color: var(--warning-border); animation: pulse 1.6s ease-in-out infinite; }
+        .date-day { font-size: 19px; font-weight: 900; line-height: 1; }
+        .date-weekday { font-size: 8px; font-weight: 900; text-transform: uppercase; opacity: .5; margin-top: 2px; }
+
+        .entry-body { flex: 1; min-width: 0; }
+        .entry-top { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); margin-bottom: var(--sp-2); }
+        .entry-client { font-size: 14px; font-weight: 900; text-transform: uppercase; color: var(--accent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+        .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 9px; font-weight: 900; padding: 3px var(--sp-2); border-radius: var(--r-sm); white-space: nowrap; }
+        .badge .lucide { font-size: 11px; }
+        .badge-time { color: var(--text-muted); background: var(--surface); border: 1px solid var(--border-light); }
+        .badge-running { color: #c2410c; background: var(--warning-soft); border: 1px solid var(--warning-border); text-transform: uppercase; letter-spacing: .04em; }
+        [data-theme="dark"] .badge-running { color: var(--warning); }
+        .badge-running .run-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--warning); animation: pulse 1.2s ease-in-out infinite; }
+        
+        .btn-finish {
+            display: inline-flex; align-items: center; gap: 5px; border: none; cursor: pointer;
+            background: var(--accent); color: #fff; font-size: 9px; font-weight: 900;
+            text-transform: uppercase; letter-spacing: .08em; padding: 5px var(--sp-3);
+            border-radius: var(--r-pill); box-shadow: var(--shadow-sm); transition: background .2s var(--ease), transform .15s var(--ease);
+        }
+        .btn-finish:hover { background: var(--warning); }
+        .btn-finish:active { transform: scale(.95); }
+        .btn-finish .lucide { font-size: 11px; }
+
+        .entry-job { margin: 0 0 var(--sp-1); font-size: 11px; font-weight: 900; text-transform: uppercase; color: var(--text); }
+        .entry-task { margin: 0 0 var(--sp-2); font-size: 13px; font-weight: 500; line-height: 1.6; color: var(--text-soft); }
+        .entry-assoc { margin: 0; display: flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 800; font-style: italic; color: var(--accent); opacity: .8; }
+        .entry-assoc .lucide { font-size: 11px; }
+
+        .entry-actions { display: flex; flex-direction: column; gap: 4px; align-self: flex-start; opacity: 1; }
+        .entry-actions .icon-btn { padding: 6px; }
+        .edit-btn:hover { color: var(--info); background: rgba(59,130,246,0.15); }
+        .delete-btn:hover { color: var(--danger); background: var(--danger-soft); }
+        @media (hover: hover) and (min-width: 1024px) {
+            .entry-actions { opacity: 0; transition: opacity .2s var(--ease); }
+            .entry-card:hover .entry-actions { opacity: 1; }
+        }
+
+        /* ---------- Empty / loading states ---------- */
+        .empty-state { border: 2px dashed var(--border); border-radius: var(--r-xl); background: var(--surface); padding: 64px var(--sp-6); text-align: center; color: var(--text-faint); }
+        .empty-state .lucide { font-size: 34px; margin: 0 auto var(--sp-4); stroke-width: 1.6; }
+        .empty-title { margin: 0 0 var(--sp-2); font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .4em; }
+        .empty-sub { margin: 0; font-size: 11px; font-weight: 600; color: var(--text-faint); }
+
+        .skeleton-card { display: flex; gap: var(--sp-4); background: var(--card); border: 1px solid var(--border-light); border-radius: var(--r-lg); padding: var(--sp-5); }
+        .sk { background: var(--border-light); border-radius: var(--r-sm); animation: shimmer 1.3s ease-in-out infinite; }
+        .sk-badge { width: 52px; height: 52px; flex-shrink: 0; border-radius: var(--r-md); }
+        .sk-lines { flex: 1; display: flex; flex-direction: column; gap: var(--sp-2); padding-top: var(--sp-1); }
+        .sk-line { height: 12px; }
+        .w-40 { width: 40%; } .w-90 { width: 90%; } .w-70 { width: 70%; }
+        @keyframes shimmer { 50% { opacity: .45; } }
+
+        /* =====================================================
+           REPORT TAB
+           ===================================================== */
+        .report-hero {
+            position: relative; overflow: hidden; background: linear-gradient(135deg, var(--navy-900), var(--navy-600));
+            color: #fff; border-radius: var(--r-2xl); box-shadow: var(--shadow-lg);
+            padding: var(--sp-10) var(--sp-8); display: flex; flex-direction: column; align-items: center; gap: var(--sp-8); text-align: center; margin-bottom: var(--sp-8);
+        }
+        @media (min-width: 1024px) { .report-hero { flex-direction: row; justify-content: space-between; text-align: left; padding: 64px; } }
+        [data-theme="dark"] .report-hero { background: linear-gradient(135deg, #1e2130, #14161f); border: 1px solid var(--border); }
+        
+        .hero-glow-rep { position: absolute; bottom: -90px; right: -90px; width: 260px; height: 260px; background: #3b82f6; border-radius: 50%; filter: blur(100px); opacity: .25; pointer-events: none; }
+        .hero-main { position: relative; z-index: 1; }
+        .hero-label { margin: 0 0 var(--sp-4); font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .5em; color: #bfdbfe; opacity: .85; }
+        .hero-hours { font-size: clamp(56px, 12vw, 110px); font-weight: 900; letter-spacing: -.05em; line-height: 1; font-variant-numeric: tabular-nums; }
+        .hero-hours span { font-size: .3em; font-weight: 300; font-style: italic; color: rgba(255,255,255,0.5); margin-left: var(--sp-2); }
+        .hero-month { margin: var(--sp-5) 0 0; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .4em; color: rgba(255,255,255,0.6); }
+        .hero-stats { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-2); margin-top: var(--sp-5); }
+        @media (min-width: 1024px) { .hero-stats { justify-content: flex-start; } }
+        .stat-chip {
+            display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+            border-radius: var(--r-pill); padding: 5px var(--sp-3); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #dbeafe;
+        }
+        .stat-chip .lucide { font-size: 12px; }
+        .btn-export { position: relative; z-index: 1; background: var(--accent); color: #fff; border: 1px solid rgba(255,255,255,0.15); padding: var(--sp-4) var(--sp-8); border-radius: var(--r-lg); box-shadow: var(--shadow-lg); width: 100%; max-width: 320px; }
+        .btn-export:hover:not(:disabled) { background: #fff; color: var(--accent); }
+        .btn-export:disabled { opacity: .4; }
+        @media (min-width: 1024px) { .btn-export { width: auto; } }
+
+        .report-card { overflow: hidden; padding: 0; }
+        .table-scroll { overflow-x: auto; }
+        .report-table { width: 100%; min-width: 820px; border-collapse: collapse; text-align: left; }
+        .report-table th { padding: var(--sp-6); background: var(--surface); font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .3em; color: var(--text-muted); white-space: nowrap; border-bottom: 1px solid var(--border); }
+        .report-table td { padding: var(--sp-5) var(--sp-6); border-bottom: 1px solid var(--border-light); vertical-align: top; }
+        .report-table .num { text-align: right; }
+        .client-row td { background: rgba(99, 102, 241, 0.05); border-left: 8px solid var(--accent); font-weight: 900; text-transform: uppercase; color: var(--text); font-size: 14px; }
+        .client-row .client-total { font-style: italic; color: var(--accent); font-size: 16px; letter-spacing: -.02em; }
+        .data-row:hover td { background: var(--surface); }
+        .cell-date { color: var(--text-muted); font-weight: 700; font-size: 11px; white-space: nowrap; }
+        .cell-client { color: var(--text); font-weight: 900; font-size: 10px; text-transform: uppercase; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .cell-job { color: var(--text); font-weight: 700; font-size: 11px; text-transform: uppercase; white-space: nowrap; }
+        .cell-task { max-width: 380px; font-size: 12px; font-weight: 600; font-style: italic; line-height: 1.6; color: var(--text-soft); }
+        .cell-assoc { color: var(--text-muted); font-size: 10px; font-weight: 800; text-transform: uppercase; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .cell-hours { font-size: 19px; font-weight: 900; letter-spacing: -.03em; color: var(--text); white-space: nowrap; }
+        .cell-hours.running { color: var(--warning); animation: pulse 1.4s ease-in-out infinite; }
+        .cell-times { margin-top: var(--sp-1); font-size: 10px; font-weight: 700; color: var(--text-muted); white-space: nowrap; }
+        .report-footer { background: var(--navy-900); padding: var(--sp-5); text-align: center; font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: .5em; color: rgba(255,255,255,0.2); }
+        [data-theme="dark"] .report-footer { background: var(--surface); border-top: 1px solid var(--border); }
+        .report-empty { padding: var(--sp-8); }
+
+        .app-footer { margin-top: var(--sp-10); text-align: center; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .3em; color: var(--text-faint); }
+
+        /* =====================================================
+           MODALS & TOASTS
+           ===================================================== */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center;
+            padding: var(--sp-6); background: rgba(10,9,38,0.72); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            opacity: 0; transition: opacity .18s var(--ease);
+        }
+        .modal-overlay.open { opacity: 1; }
+        .modal-panel {
+            width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto; background: var(--card); border: 1px solid var(--border-light);
+            border-radius: var(--r-2xl); box-shadow: var(--shadow-2xl); padding: var(--sp-10) var(--sp-8); text-align: center;
+            transform: scale(.94) translateY(8px); transition: transform .18s var(--ease);
+        }
+        .modal-overlay.open .modal-panel { transform: scale(1) translateY(0); }
+        .modal-icon { width: 52px; height: 52px; margin: 0 auto var(--sp-4); display: flex; align-items: center; justify-content: center; border-radius: var(--r-md); background: var(--accent-soft); color: var(--accent); }
+        .modal-icon .lucide { font-size: 24px; }
+        .modal-icon.danger { background: var(--danger-soft); color: var(--danger); }
+        .modal-title { margin: 0 0 var(--sp-2); font-size: 22px; font-weight: 900; font-style: italic; text-transform: uppercase; color: var(--text); }
+        .modal-sub { margin: 0 0 var(--sp-6); font-size: 13px; font-weight: 700; color: var(--text-soft); line-height: 1.7; overflow-wrap: break-word; }
+        .modal-fields { display: flex; flex-direction: column; gap: var(--sp-4); text-align: left; margin-bottom: var(--sp-6); }
+        .modal-hint { margin: 0; font-size: 10px; font-weight: 700; color: var(--text-muted); text-align: center; line-height: 1.7; }
+        .modal-actions { display: flex; gap: var(--sp-3); margin-top: var(--sp-6); }
+        .modal-actions .btn { flex: 1; padding-top: var(--sp-4); padding-bottom: var(--sp-4); }
+
+        #toast-root { position: fixed; bottom: var(--sp-6); left: 50%; transform: translateX(-50%); z-index: 1100; display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); pointer-events: none; width: max-content; max-width: calc(100vw - 48px); }
+        .toast { display: flex; align-items: center; gap: var(--sp-2); background: var(--text); color: var(--bg); border-radius: var(--r-pill); padding: var(--sp-3) var(--sp-5); font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .1em; box-shadow: var(--shadow-lg); opacity: 0; transform: translateY(12px); transition: opacity .25s var(--ease), transform .25s var(--ease); }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast .lucide { font-size: 14px; color: var(--success); }
+
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- Firebase bootstrap -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, addDoc, deleteDoc, updateDoc, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        try {
+            let firebaseConfig;
+            if (typeof __firebase_config !== 'undefined') {
+                firebaseConfig = typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
+            } else {
+                firebaseConfig = {
+                    apiKey: "AIzaSyDJITYDWynAWET-W6UQmYyykt7qwK3MNXM",
+                    authDomain: "woker-2b754.firebaseapp.com",
+                    projectId: "woker-2b754",
+                    storageBucket: "woker-2b754.firebasestorage.app",
+                    messagingSenderId: "481506351045",
+                    appId: "1:481506351045:web:074a37083a5585e1989dac",
+                    measurementId: "G-LJPHP9KNTX"
+                };
+            }
+
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'woker-custom-app';
+
+            window.FirebaseServices = {
+                db, auth, appId, collection, doc, addDoc, deleteDoc, updateDoc, onSnapshot,
+                query, signInAnonymously, signInWithCustomToken, onAuthStateChanged
+            };
+            window.dispatchEvent(new Event('firebase-ready'));
+        } catch (e) {
+            console.error("Firebase init error:", e);
+            window.FirebaseSetupError = e.message;
+        }
+    </script>
+
+    <script id="app-script">
+    (function () {
+        'use strict';
+
+        /* =====================================================
+           i18n Translation Dictionary
+           ===================================================== */
+        var i18n = {
+            id: {
+                appTag: "Work Tracker for Lawyers",
+                loginTitle: "Hi, Wokers!",
+                loginSub: "Masukkan Kode Rahasia Anda untuk melanjutkan.",
+                loginPh: "XXX-0000",
+                loginRemember: "Ingat Saya",
+                loginBtn: "Masuk",
+                loginNote: "Anda dapat mengakses akun pada perangkat lain dengan memasukkan kode rahasia yang sama.",
+                nameTitle: "Siapa Anda?",
+                nameSub: "Masukkan nama lengkap atau inisial Anda.",
+                namePh: "e.g. Bli Juan",
+                nameBtn: "Simpan",
+                tabWork: "Pekerjaan",
+                tabReport: "Laporan",
+                formTitle: "Giat Apa Hari Ini?",
+                fClient: "Klien",
+                fClientPh: "e.g. BANK INDONESIA",
+                fDate: "Tanggal",
+                fStart: "Waktu Mulai",
+                fEnd: "Waktu Selesai",
+                fEndHint: "*Opsional (Bisa diisi nanti)",
+                fAssoc: "Associates",
+                fAssocPh: "e.g. Tana, Tini, & Tunu",
+                fJob: "Pekerjaan",
+                fJobPh: "e.g. Legal Memorandum",
+                fTask: "Detail Pekerjaan",
+                fTaskPh: "Uraikan giat Anda...",
+                btnSave: "Simpan",
+                btnSaving: "Menyimpan...",
+                listTitle: "Riwayat Pekerjaan",
+                itemCount: "Item",
+                emptyData: "Belum Ada Data",
+                emptyDataSub: "Catatan pekerjaan untuk {month} {year} akan muncul di sini.",
+                emptyReport: "Laporan Kosong",
+                emptyReportSub: "Tambahkan catatan pekerjaan di tab Pekerjaan untuk melihat laporan bulan ini.",
+                totalHours: "Total Jam Kerja",
+                activities: "Aktivitas",
+                clients: "Klien",
+                running: "Berjalan",
+                exportBtn: "Unduh Excel",
+                exportEmpty: "Tidak ada data untuk diunduh",
+                exportSuccess: "Timesheet diunduh",
+                thDate: "Tgl",
+                thClient: "Klien",
+                thJob: "Pekerjaan",
+                thTask: "Detail Pekerjaan",
+                thAssoc: "Associates",
+                thTime: "Waktu & Jam",
+                endReport: "End of Report Record",
+                syncErr: "Koneksi bermasalah",
+                syncBusy: "Menyinkronkan...",
+                syncOk: "Tersinkron",
+                btnFinish: "Selesaikan Sekarang",
+                badgeRun: "Mulai {time} · Berjalan",
+                badgeTime: "{start} – {end} ({hours}h)",
+                toastSaved: "Aktivitas tersimpan",
+                toastUpdated: "Aktivitas diperbarui",
+                toastFinished: "Pekerjaan diselesaikan",
+                toastDeleted: "Catatan dihapus",
+                modalFinish: "Selesaikan",
+                modalEdit: "Edit Pekerjaan",
+                modalHint: "Sesuaikan data di atas jika terdapat ketidakakuratan sebelum disimpan secara permanen.",
+                modalCancel: "Batal",
+                modalConfirm: "Konfirmasi",
+                modalDeleteTxt: "Hapus catatan pekerjaan ini secara permanen?",
+                modalDeleteBtn: "Ya, Lanjutkan",
+                modalLogoutTxt: "Apakah Anda yakin ingin keluar dari akun ini?",
+                modalLogoutBtn: "Ya, Lanjutkan",
+                errLength: "Nama minimal 2 karakter.",
+                errConnect: "Gagal menyimpan. Aplikasi belum terhubung ke database Cloud.",
+                errIncomplete: "Mohon lengkapi Tanggal, Waktu Mulai, dan Waktu Selesai.",
+                months: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+            },
+            en: {
+                appTag: "Work Tracker for Lawyers",
+                loginTitle: "Hi, Wokers!",
+                loginSub: "Enter your Secret Code to continue.",
+                loginPh: "XXX-0000",
+                loginRemember: "Remember Me",
+                loginBtn: "Log In",
+                loginNote: "You can access your account on other devices by entering the same secret code.",
+                nameTitle: "Who are you?",
+                nameSub: "Enter your full name or initials.",
+                namePh: "e.g. John Doe",
+                nameBtn: "Save",
+                tabWork: "Work",
+                tabReport: "Report",
+                formTitle: "What are you working on?",
+                fClient: "Client",
+                fClientPh: "e.g. Acme Corp",
+                fDate: "Date",
+                fStart: "Start Time",
+                fEnd: "End Time",
+                fEndHint: "*Optional (Can be filled later)",
+                fAssoc: "Associates",
+                fAssocPh: "e.g. Alice, Bob",
+                fJob: "Job Title",
+                fJobPh: "e.g. Legal Memorandum",
+                fTask: "Task Description",
+                fTaskPh: "Describe your activity...",
+                btnSave: "Save",
+                btnSaving: "Saving...",
+                listTitle: "Work History",
+                itemCount: "Items",
+                emptyData: "No Data Yet",
+                emptyDataSub: "Work records for {month} {year} will appear here.",
+                emptyReport: "Empty Report",
+                emptyReportSub: "Add work records in the Work tab to view this month's report.",
+                totalHours: "Total Work Hours",
+                activities: "Activities",
+                clients: "Clients",
+                running: "Running",
+                exportBtn: "Download Excel",
+                exportEmpty: "No data to download",
+                exportSuccess: "Timesheet downloaded",
+                thDate: "Date",
+                thClient: "Client",
+                thJob: "Job Title",
+                thTask: "Task Description",
+                thAssoc: "Associates",
+                thTime: "Time & Hours",
+                endReport: "End of Report Record",
+                syncErr: "Connection error",
+                syncBusy: "Syncing...",
+                syncOk: "Synced",
+                btnFinish: "Finish Now",
+                badgeRun: "Started {time} · Running",
+                badgeTime: "{start} – {end} ({hours}h)",
+                toastSaved: "Activity saved",
+                toastUpdated: "Activity updated",
+                toastFinished: "Task finished",
+                toastDeleted: "Record deleted",
+                modalFinish: "Finish Task",
+                modalEdit: "Edit Task",
+                modalHint: "Adjust the data above if there are inaccuracies before saving permanently.",
+                modalCancel: "Cancel",
+                modalConfirm: "Confirm",
+                modalDeleteTxt: "Permanently delete this work record?",
+                modalDeleteBtn: "Yes, Delete",
+                modalLogoutTxt: "Are you sure you want to log out of this account?",
+                modalLogoutBtn: "Yes, Log Out",
+                errLength: "Name must be at least 2 characters.",
+                errConnect: "Failed to save. Application is not connected to Cloud database.",
+                errIncomplete: "Please complete Date, Start Time, and End Time.",
+                months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+            }
+        };
+
+        function t(key, vars) {
+            var str = i18n[state.lang][key] || key;
+            if (vars) {
+                for (var k in vars) { str = str.replace('{' + k + '}', vars[k]); }
+            }
+            return str;
+        }
+
+        /* =====================================================
+           Helpers
+           ===================================================== */
+        function $(sel, el) { return (el || document).querySelector(sel); }
+
+        function esc(v) {
+            return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+            });
+        }
+
+        function getCurrentTime() { return new Date().toTimeString().slice(0, 5); }
+        function getToday() { return new Date().toISOString().split('T')[0]; }
+
+        function safeCollectionKey(key) {
+            return 'data_' + key.trim().toLowerCase().replace(/[^a-z0-9]/g, '_');
+        }
+
+        function calcHours(startTime, endTime) {
+            if (!startTime || !endTime) return 0;
+            var start = new Date('1970-01-01T' + startTime + ':00');
+            var end = new Date('1970-01-01T' + endTime + ':00');
+            var diff = end - start;
+            if (diff < 0) diff += 24 * 60 * 60 * 1000;
+            return parseFloat((diff / 3600000).toFixed(2));
+        }
+
+        function refreshIcons() { if (window.lucide) window.lucide.createIcons(); }
+
+        /* =====================================================
+           State
+           ===================================================== */
+        var state = {
+            user: null,
+            firebaseReady: false,
+            authStarted: false,
+            cloudError: false,
+            isCloudSyncing: false,
+            hasLoadedOnce: false,
+            unsubscribe: null,
+            subscribedKey: null,
+
+            isLoggedIn: !!localStorage.getItem('woker_access_key'),
+            accessKey: localStorage.getItem('woker_access_key') || '',
+            userName: localStorage.getItem('woker_user_name') || '',
+            lang: localStorage.getItem('woker_lang') || 'id',
+            dark: localStorage.getItem('woker_dark') === 'true',
+
+            entries: [],
+            currentMonth: new Date().getMonth(),
+            currentYear: new Date().getFullYear(),
+            activeTab: 'input',
+            isSubmitting: false
+        };
+
+        var root = document.getElementById('root');
+
+        /* =====================================================
+           Derived data
+           ===================================================== */
+        function getFilteredEntries() {
+            return state.entries.filter(function (e) {
+                var d = new Date(e.date);
+                return d.getMonth() === state.currentMonth && d.getFullYear() === state.currentYear;
+            }).sort(function (a, b) { return new Date(b.date) - new Date(a.date); });
+        }
+
+        function getGroupedEntries(filtered) {
+            var groups = {};
+            filtered.forEach(function (entry) {
+                if (!groups[entry.client]) groups[entry.client] = [];
+                groups[entry.client].push(entry);
+            });
+            return Object.entries(groups).sort(function (a, b) { return a[0].localeCompare(b[0]); });
+        }
+
+        function getTotalHours(filtered) {
+            return filtered.reduce(function (sum, e) { return sum + parseFloat(e.hours || 0); }, 0);
+        }
+
+        /* =====================================================
+           Theme & Language Toggles
+           ===================================================== */
+        function toggleTheme() {
+            state.dark = !state.dark;
+            localStorage.setItem('woker_dark', state.dark);
+            if (state.dark) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+            refreshIcons();
+        }
+
+        function toggleLang() {
+            state.lang = state.lang === 'id' ? 'en' : 'id';
+            localStorage.setItem('woker_lang', state.lang);
+            render(); 
+        }
+
+        /* =====================================================
+           Toast & modal primitives
+           ===================================================== */
+        function showToast(message, icon) {
+            var rootEl = $('#toast-root');
+            if (!rootEl) {
+                rootEl = document.createElement('div');
+                rootEl.id = 'toast-root';
+                document.body.appendChild(rootEl);
+            }
+            var toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = '<i data-lucide="' + (icon || 'check-circle-2') + '"></i><span>' + esc(message) + '</span>';
+            rootEl.appendChild(toast);
+            refreshIcons();
+            requestAnimationFrame(function () { toast.classList.add('show'); });
+            setTimeout(function () {
+                toast.classList.remove('show');
+                setTimeout(function () { toast.remove(); }, 300);
+            }, 2600);
+        }
+
+        function openModal(innerHTML, dismissible) {
+            var overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            overlay.innerHTML = '<div class="modal-panel">' + innerHTML + '</div>';
+            if (dismissible) {
+                overlay.addEventListener('click', function (e) {
+                    if (e.target === overlay) closeModal(overlay);
+                });
+            }
+            document.body.appendChild(overlay);
+            refreshIcons();
+            requestAnimationFrame(function () { overlay.classList.add('open'); });
+            return overlay;
+        }
+
+        function closeModal(overlay) {
+            overlay.classList.remove('open');
+            setTimeout(function () { overlay.remove(); }, 200);
+        }
+
+        function showInfoModal(message) {
+            var overlay = openModal(
+                '<div class="modal-icon"><i data-lucide="info"></i></div>' +
+                '<h4 class="modal-title">Info</h4>' +
+                '<p class="modal-sub">' + esc(message) + '</p>' +
+                '<button class="btn btn-primary btn-block" data-modal-close>' + (state.lang==='id'?'Tutup':'Close') + '</button>',
+                true
+            );
+            overlay.querySelector('[data-modal-close]').addEventListener('click', function () { closeModal(overlay); });
+        }
+
+        function showConfirm(message, confirmBtnText, onConfirm) {
+            var overlay = openModal(
+                '<div class="modal-icon danger"><i data-lucide="alert-triangle"></i></div>' +
+                '<h4 class="modal-title">' + t('modalConfirm') + '</h4>' +
+                '<p class="modal-sub">' + esc(message) + '</p>' +
+                '<div class="modal-actions">' +
+                '  <button class="btn btn-ghost" data-modal-cancel>' + t('modalCancel') + '</button>' +
+                '  <button class="btn btn-danger" data-modal-ok>' + confirmBtnText + '</button>' +
+                '</div>'
+            );
+            overlay.querySelector('[data-modal-cancel]').addEventListener('click', function () { closeModal(overlay); });
+            overlay.querySelector('[data-modal-ok]').addEventListener('click', function () {
+                closeModal(overlay);
+                onConfirm();
+            });
+        }
+
+        /* =====================================================
+           Firebase: auth bootstrap + Firestore subscription
+           ===================================================== */
+        function bootFirebase() {
+            if (window.FirebaseServices) { setupAuth(); return; }
+            var onReady = function () { setupAuth(); };
+            window.addEventListener('firebase-ready', onReady, { once: true });
+            var interval = setInterval(function () {
+                if (window.FirebaseServices) {
+                    clearInterval(interval);
+                    window.removeEventListener('firebase-ready', onReady);
+                    setupAuth();
+                } else if (window.FirebaseSetupError) {
+                    clearInterval(interval);
+                    window.removeEventListener('firebase-ready', onReady);
+                    state.cloudError = true;
+                    showInfoModal(window.FirebaseSetupError);
+                    updateConnectionUI();
+                }
+            }, 200);
+        }
+
+        async function setupAuth() {
+            if (state.authStarted) return;
+            state.authStarted = true;
+            var fs = window.FirebaseServices;
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await fs.signInWithCustomToken(fs.auth, __initial_auth_token);
+                } else {
+                    await fs.signInAnonymously(fs.auth);
+                }
+                fs.onAuthStateChanged(fs.auth, function (u) {
+                    state.user = u;
+                    state.firebaseReady = true;
+                    updateConnectionUI();
+                    ensureSubscription();
+                });
+            } catch (error) {
+                console.error('Auth Error:', error);
+                state.cloudError = true;
+                showInfoModal(state.lang === 'id' ? 'Gagal masuk ke layanan Cloud.' : 'Failed to sign in to Cloud services.');
+                updateConnectionUI();
+            }
+        }
+
+        function ensureSubscription() {
+            if (!state.firebaseReady || !state.user || !state.isLoggedIn ||
+                !state.accessKey || !state.userName || !window.FirebaseServices) return;
+
+            var key = safeCollectionKey(state.accessKey);
+            if (state.subscribedKey === key) return;
+            if (state.unsubscribe) { state.unsubscribe(); state.unsubscribe = null; }
+
+            state.subscribedKey = key;
+            state.isCloudSyncing = true;
+            updateStatusBar();
+
+            var fs = window.FirebaseServices;
+            var colRef = fs.collection(fs.db, 'artifacts', fs.appId, 'public', 'data', key);
+            state.unsubscribe = fs.onSnapshot(colRef, function (snapshot) {
+                state.entries = snapshot.docs.map(function (d) {
+                    return Object.assign({ id: d.id }, d.data());
+                });
+                state.isCloudSyncing = false;
+                state.cloudError = false;
+                state.hasLoadedOnce = true;
+                refreshDynamic();
+                updateConnectionUI();
+            }, function (error) {
+                console.error('Firestore Error:', error);
+                state.cloudError = true;
+                state.isCloudSyncing = false;
+                state.hasLoadedOnce = true;
+                showInfoModal(state.lang === 'id' ? "Gagal membaca data dari Cloud." : "Failed to read data from Cloud.");
+                refreshDynamic();
+                updateConnectionUI();
+            });
+        }
+
+        /* =====================================================
+           Screen: Login (Redesigned)
+           ===================================================== */
+        function renderLogin() {
+            root.innerHTML =
+                '<div class="auth-split">' +
+                '  <div class="auth-brand">' +
+                '    <div class="auth-brand-inner">' +
+                '      <h1 class="brand-logo">Woker</h1>' +
+                '      <p class="brand-tag">' + t('appTag') + '</p>' +
+                '    </div>' +
+                '    <div class="auth-glow"></div><div class="auth-pattern"></div>' +
+                '  </div>' +
+                '  <div class="auth-form-wrap">' +
+                '    <div class="auth-top-bar">' +
+                '      <button class="lang-toggle-btn" id="lang-toggle-login"><i data-lucide="globe"></i> ' + (state.lang === 'id' ? 'EN' : 'ID') + '</button>' +
+                '    </div>' +
+                '    <div class="auth-body">' +
+                '      <div class="mobile-brand">' +
+                '        <h1 class="brand-logo">Woker</h1>' +
+                '        <p class="brand-tag">' + t('appTag') + '</p>' +
+                '      </div>' +
+                '      <h2 class="auth-title">' + t('loginTitle') + '</h2>' +
+                '      <p class="auth-sub">' + t('loginSub') + '</p>' +
+                '      <form id="login-form" class="auth-form" novalidate>' +
+                '        <input id="login-code" class="code-input" type="text" required maxlength="8"' +
+                '               placeholder="' + t('loginPh') + '" autocomplete="off" autocapitalize="characters" spellcheck="false">' +
+                '        <label class="remember">' +
+                '          <input type="checkbox" id="login-remember" checked>' +
+                '          <span>' + t('loginRemember') + '</span>' +
+                '        </label>' +
+                '        <div>' +
+                '          <button type="submit" id="login-btn" class="btn btn-primary btn-block" disabled>' +
+                             t('loginBtn') + ' <i data-lucide="arrow-right"></i>' +
+                '          </button>' +
+                '          <p class="auth-note">' + t('loginNote') + '</p>' +
+                '        </div>' +
+                '      </form>' +
+                '    </div>' +
+                '  </div>' +
+                '</div>';
+
+            $('#lang-toggle-login').addEventListener('click', toggleLang);
+
+            var input = $('#login-code');
+            var button = $('#login-btn');
+            var isValid = function (v) { return /^[A-Z]{3}-[0-9]{4}$/.test(v); };
+
+            input.addEventListener('input', function () {
+                var val = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                input.value = val.length > 3 ? val.slice(0, 3) + '-' + val.slice(3, 7) : val;
+                var valid = isValid(input.value);
+                button.disabled = !valid;
+                input.classList.toggle('invalid', input.value.length > 0 && !valid);
+            });
+
+            $('#login-form').addEventListener('submit', function (e) {
+                e.preventDefault();
+                if (!isValid(input.value)) return;
+                var key = input.value.trim().toUpperCase();
+                state.accessKey = key;
+                state.isLoggedIn = true;
+                if ($('#login-remember').checked) localStorage.setItem('woker_access_key', key);
+                render();
+                ensureSubscription();
+            });
+
+            refreshIcons();
+            input.focus();
+        }
+
+        /* =====================================================
+           Screen: Name setup
+           ===================================================== */
+        function renderName() {
+            root.innerHTML =
+                '<div class="auth-split" style="flex-direction:column; justify-content:center; align-items:center; background: var(--bg);">' +
+                '  <div style="max-width:400px; width:100%; text-align:center; padding:var(--sp-6)">' +
+                '    <h1 class="brand-logo" style="color:var(--text); font-size:48px; margin-bottom:var(--sp-2)">Woker</h1>' +
+                '    <h2 class="auth-title" style="margin-top:var(--sp-8)">' + t('nameTitle') + '</h2>' +
+                '    <p class="auth-sub" style="font-style:italic">' + t('nameSub') + '</p>' +
+                '    <form id="name-form" class="auth-form">' +
+                '      <input id="name-input" class="code-input" style="letter-spacing:.05em;font-size:19px" type="text" required' +
+                '             placeholder="' + t('namePh') + '" autocomplete="name">' +
+                '      <button type="submit" class="btn btn-primary btn-block">' + t('nameBtn') + ' <i data-lucide="check"></i></button>' +
+                '    </form>' +
+                '  </div>' +
+                '</div>';
+
+            $('#name-form').addEventListener('submit', function (e) {
+                e.preventDefault();
+                var name = $('#name-input').value.trim();
+                if (name.length < 2) { showInfoModal(t('errLength')); return; }
+                state.userName = name;
+                localStorage.setItem('woker_user_name', name);
+                render();
+                ensureSubscription();
+            });
+
+            refreshIcons();
+            $('#name-input').focus();
+        }
+
+        /* =====================================================
+           Screen: Main app
+           ===================================================== */
+        function renderApp() {
+            root.innerHTML =
+                '<div class="app">' +
+                '  <header class="app-header">' +
+                '    <div class="header-inner">' +
+                '      <div class="brand">' +
+                '        <h1 class="brand-logo">Woker</h1>' +
+                '        <p class="brand-tag">' + t('appTag') + '</p>' +
+                '      </div>' +
+                '      <nav class="month-nav">' +
+                '        <button type="button" class="month-btn" id="prev-month"><i data-lucide="chevron-left"></i></button>' +
+                '        <div class="month-label">' +
+                '          <span class="month-name" id="month-name"></span>' +
+                '          <span class="month-year" id="month-year"></span>' +
+                '        </div>' +
+                '        <button type="button" class="month-btn" id="next-month"><i data-lucide="chevron-right"></i></button>' +
+                '      </nav>' +
+                '      <div class="header-actions">' +
+                '        <button type="button" class="icon-btn top-action-btn" id="app-lang-toggle" style="font-size:10px; font-weight:900;">' + state.lang.toUpperCase() + '</button>' +
+                '        <button type="button" class="icon-btn top-action-btn" id="app-theme-toggle"><i data-lucide="moon"></i></button>' +
+                '      </div>' +
+                '    </div>' +
+                '  </header>' +
+
+                '  <main class="app-main">' +
+                '    <div class="status-bar" id="status-bar"></div>' +
+
+                '    <div class="tabs" role="tablist">' +
+                '      <button type="button" class="tab-btn" id="tab-btn-input" role="tab"><i data-lucide="pen-line"></i> ' + t('tabWork') + '</button>' +
+                '      <button type="button" class="tab-btn" id="tab-btn-rekap" role="tab"><i data-lucide="bar-chart-3"></i> ' + t('tabReport') + '</button>' +
+                '    </div>' +
+
+                '    <section id="tab-input" class="tab-panel">' +
+                '      <div class="work-grid">' +
+                '        <div class="form-col">' +
+                '          <form id="entry-form" class="card entry-form" autocomplete="off">' +
+                '            <h3 class="form-title"><i data-lucide="briefcase"></i> ' + t('formTitle') + '</h3>' +
+                '            <div class="field">' +
+                '              <label class="label" for="f-client">' + t('fClient') + '</label>' +
+                '              <input id="f-client" type="text" required placeholder="' + t('fClientPh') + '">' +
+                '            </div>' +
+                '            <div class="field">' +
+                '              <label class="label" for="f-date">' + t('fDate') + '</label>' +
+                '              <input id="f-date" type="date" required value="' + getToday() + '">' +
+                '            </div>' +
+                '            <div class="field-row">' +
+                '              <div class="field">' +
+                '                <label class="label" for="f-start">' + t('fStart') + '</label>' +
+                '                <input id="f-start" type="time" required value="' + getCurrentTime() + '">' +
+                '              </div>' +
+                '              <div class="field">' +
+                '                <label class="label" for="f-end">' + t('fEnd') + '</label>' +
+                '                <input id="f-end" type="time" class="input-optional">' +
+                '                <p class="hint-optional">' + t('fEndHint') + '</p>' +
+                '              </div>' +
+                '            </div>' +
+                '            <div class="field">' +
+                '              <label class="label" for="f-assoc">' + t('fAssoc') + '</label>' +
+                '              <input id="f-assoc" type="text" placeholder="' + t('fAssocPh') + '">' +
+                '            </div>' +
+                '            <div class="field">' +
+                '              <label class="label" for="f-job">' + t('fJob') + '</label>' +
+                '              <input id="f-job" type="text" required placeholder="' + t('fJobPh') + '">' +
+                '            </div>' +
+                '            <div class="field">' +
+                '              <label class="label" for="f-task">' + t('fTask') + '</label>' +
+                '              <textarea id="f-task" required placeholder="' + t('fTaskPh') + '"></textarea>' +
+                '            </div>' +
+                '            <button type="submit" id="submit-btn" class="btn btn-primary btn-block">' +
+                '              <i data-lucide="save"></i> ' + t('btnSave') +
+                '            </button>' +
+                '            <p id="form-status" class="form-status"></p>' +
+                '          </form>' +
+                '        </div>' +
+                '        <div class="list-col">' +
+                '          <div class="list-head">' +
+                '            <h3 class="list-title">' + t('listTitle') + '</h3>' +
+                '            <span class="count-badge" id="entry-count">0 ' + t('itemCount') + '</span>' +
+                '          </div>' +
+                '          <div id="entry-list" class="entry-list"></div>' +
+                '        </div>' +
+                '      </div>' +
+                '    </section>' +
+
+                '    <section id="tab-rekap" class="tab-panel" hidden>' +
+                '      <div id="report-hero"></div>' +
+                '      <div id="report-table" class="card report-card"></div>' +
+                '    </section>' +
+                '  </main>' +
+
+                '  <footer class="app-footer">Woker — ' + t('appTag') + '</footer>' +
+                '</div>';
+
+            bindAppEvents();
+            updateMonthLabel();
+            updateStatusBar();
+            updateConnectionUI();
+            renderEntryList();
+            renderReport();
+            setActiveTab(state.activeTab);
+            refreshIcons();
+        }
+
+        function bindAppEvents() {
+            $('#app-theme-toggle').addEventListener('click', toggleTheme);
+            $('#app-lang-toggle').addEventListener('click', toggleLang);
+
+            $('#prev-month').addEventListener('click', function () {
+                if (state.currentMonth === 0) { state.currentMonth = 11; state.currentYear--; }
+                else { state.currentMonth--; }
+                updateMonthLabel();
+                refreshDynamic();
+            });
+            $('#next-month').addEventListener('click', function () {
+                if (state.currentMonth === 11) { state.currentMonth = 0; state.currentYear++; }
+                else { state.currentMonth++; }
+                updateMonthLabel();
+                refreshDynamic();
+            });
+
+            $('#tab-btn-input').addEventListener('click', function () { setActiveTab('input'); });
+            $('#tab-btn-rekap').addEventListener('click', function () { setActiveTab('rekap'); });
+
+            $('#status-bar').addEventListener('click', function (e) {
+                if (e.target.closest('#logout-btn')) handleLogout();
+            });
+
+            $('#entry-form').addEventListener('submit', handleSubmit);
+
+            $('#entry-list').addEventListener('click', function (e) {
+                var finishBtn = e.target.closest('[data-action="finish"]');
+                var editBtn = e.target.closest('[data-action="edit"]');
+                var delBtn = e.target.closest('[data-action="delete"]');
+                
+                if (finishBtn) {
+                    var entry = state.entries.find(function (x) { return x.id === finishBtn.dataset.id; });
+                    if (entry) openFinishModal(entry);
+                    return;
+                }
+                if (editBtn) {
+                    var entryEdit = state.entries.find(function (x) { return x.id === editBtn.dataset.id; });
+                    if (entryEdit) openEditModal(entryEdit);
+                    return;
+                }
+                if (delBtn) handleDelete(delBtn.dataset.id);
+            });
+
+            $('#tab-rekap').addEventListener('click', function (e) {
+                if (e.target.closest('#export-btn')) exportExcel();
+            });
+        }
+
+        function setActiveTab(tab) {
+            state.activeTab = tab;
+            $('#tab-input').hidden = tab !== 'input';
+            $('#tab-rekap').hidden = tab !== 'rekap';
+            $('#tab-btn-input').classList.toggle('active', tab === 'input');
+            $('#tab-btn-rekap').classList.toggle('active', tab === 'rekap');
+        }
+
+        function updateMonthLabel() {
+            var nameEl = $('#month-name');
+            if (!nameEl) return;
+            nameEl.textContent = i18n[state.lang].months[state.currentMonth];
+            $('#month-year').textContent = state.currentYear;
+        }
+
+        function updateStatusBar() {
+            var bar = $('#status-bar');
+            if (!bar) return;
+            var dotClass = state.cloudError ? 'error' : (!state.user || state.isCloudSyncing) ? 'busy' : 'ok';
+            var dotTitle = state.cloudError ? t('syncErr') : (!state.user || state.isCloudSyncing) ? t('syncBusy') : t('syncOk');
+            bar.innerHTML =
+                '<div class="status-left">' +
+                '  <span class="sync-dot ' + dotClass + '" title="' + dotTitle + '"></span>' +
+                '  <span class="status-name"><i data-lucide="user-round"></i>' + esc(state.userName) + '</span>' +
+                '  <span class="status-sep">|</span>' +
+                '  <span class="status-id">ID: ' + esc(state.accessKey) + '</span>' +
+                '</div>' +
+                '<button type="button" id="logout-btn" class="btn-logout"><i data-lucide="log-out"></i> ' + (state.lang==='id'?'Keluar':'Log Out') + '</button>';
+            refreshIcons();
+        }
+
+        function updateConnectionUI() {
+            var el = $('#form-status');
+            if (el) {
+                if (state.cloudError) {
+                    el.textContent = t('syncErr');
+                    el.className = 'form-status is-error';
+                } else if (!state.firebaseReady || (!state.user && state.authStarted)) {
+                    el.textContent = t('syncBusy');
+                    el.className = 'form-status is-loading';
+                } else {
+                    el.textContent = '';
+                    el.className = 'form-status';
+                }
+            }
+            updateStatusBar();
+        }
+
+        /* ---------- Entry list ---------- */
+        function entryCardHTML(entry) {
+            var d = new Date(entry.date);
+            var day = isNaN(d) ? '?' : d.getDate();
+            var weekday = isNaN(d) ? '' : d.toLocaleDateString(state.lang === 'id' ? 'id-ID' : 'en-US', { weekday: 'short' });
+            var running = !entry.endTime;
+
+            var statusHTML = running
+                ? '<span class="badge badge-running"><span class="run-dot"></span>' + t('badgeRun', { time: esc(entry.startTime) }) + '</span>' +
+                  '<button type="button" class="btn-finish" data-action="finish" data-id="' + esc(entry.id) + '">' +
+                  '<i data-lucide="check-circle-2"></i>' + t('btnFinish') + '</button>'
+                : '<span class="badge badge-time"><i data-lucide="clock"></i>' +
+                  t('badgeTime', { start: esc(entry.startTime), end: esc(entry.endTime), hours: esc(entry.hours) }) + '</span>';
+
+            return (
+                '<article class="entry-card' + (running ? ' is-running' : '') + '">' +
+                '  <div class="date-badge">' +
+                '    <span class="date-day">' + day + '</span>' +
+                '    <span class="date-weekday">' + esc(weekday) + '</span>' +
+                '  </div>' +
+                '  <div class="entry-body">' +
+                '    <div class="entry-top">' +
+                '      <span class="entry-client">' + esc(entry.client) + '</span>' +
+                       statusHTML +
+                '    </div>' +
+                     (entry.jobTitle ? '<p class="entry-job">' + esc(entry.jobTitle) + '</p>' : '') +
+                '    <p class="entry-task">' + esc(entry.task) + '</p>' +
+                '    <p class="entry-assoc"><i data-lucide="users"></i>Associates: ' + esc(entry.associates) + '</p>' +
+                '  </div>' +
+                '  <div class="entry-actions">' +
+                '    <button type="button" class="icon-btn edit-btn" data-action="edit" data-id="' + esc(entry.id) + '">' +
+                '      <i data-lucide="pencil-line"></i>' +
+                '    </button>' +
+                '    <button type="button" class="icon-btn delete-btn" data-action="delete" data-id="' + esc(entry.id) + '">' +
+                '      <i data-lucide="trash-2"></i>' +
+                '    </button>' +
+                '  </div>' +
+                '</article>'
+            );
+        }
+
+        function renderEntryList() {
+            var listEl = $('#entry-list');
+            if (!listEl) return;
+            var filtered = getFilteredEntries();
+            $('#entry-count').textContent = filtered.length + ' ' + t('itemCount');
+
+            if (!state.hasLoadedOnce && !state.cloudError) {
+                var skeleton =
+                    '<div class="skeleton-card"><div class="sk sk-badge"></div><div class="sk-lines">' +
+                    '<div class="sk sk-line w-40"></div><div class="sk sk-line w-90"></div><div class="sk sk-line w-70"></div>' +
+                    '</div></div>';
+                listEl.innerHTML = skeleton + skeleton + skeleton;
+                return;
+            }
+
+            if (filtered.length === 0) {
+                listEl.innerHTML =
+                    '<div class="empty-state">' +
+                    '  <i data-lucide="inbox"></i>' +
+                    '  <p class="empty-title">' + t('emptyData') + '</p>' +
+                    '  <p class="empty-sub">' + t('emptyDataSub', { month: i18n[state.lang].months[state.currentMonth], year: state.currentYear }) + '</p>' +
+                    '</div>';
+                refreshIcons();
+                return;
+            }
+
+            listEl.innerHTML = filtered.map(entryCardHTML).join('');
+            refreshIcons();
+        }
+
+        /* ---------- Report tab ---------- */
+        function renderReport() {
+            var hero = $('#report-hero');
+            var tableCard = $('#report-table');
+            if (!hero || !tableCard) return;
+
+            var filtered = getFilteredEntries();
+            var total = getTotalHours(filtered);
+            var clientCount = new Set(filtered.map(function (e) { return e.client; })).size;
+            var runningCount = filtered.filter(function (e) { return !e.endTime; }).length;
+
+            hero.innerHTML =
+                '<div class="report-hero">' +
+                '  <div class="hero-main">' +
+                '    <p class="hero-label">' + t('totalHours') + '</p>' +
+                '    <div class="hero-hours">' + total.toFixed(1) + '<span>h</span></div>' +
+                '    <p class="hero-month">' + i18n[state.lang].months[state.currentMonth] + ' ' + state.currentYear + '</p>' +
+                '    <div class="hero-stats">' +
+                '      <span class="stat-chip"><i data-lucide="list-checks"></i>' + filtered.length + ' ' + t('activities') + '</span>' +
+                '      <span class="stat-chip"><i data-lucide="building-2"></i>' + clientCount + ' ' + t('clients') + '</span>' +
+                       (runningCount > 0 ? '<span class="stat-chip"><i data-lucide="timer"></i>' + runningCount + ' ' + t('running') + '</span>' : '') +
+                '    </div>' +
+                '  </div>' +
+                '  <button type="button" id="export-btn" class="btn btn-export"' + (filtered.length === 0 ? ' disabled' : '') + '>' +
+                '    <i data-lucide="download"></i> ' + t('exportBtn') +
+                '  </button>' +
+                '  <div class="hero-glow-rep"></div>' +
+                '</div>';
+
+            if (filtered.length === 0) {
+                tableCard.innerHTML =
+                    '<div class="report-empty"><div class="empty-state">' +
+                    '  <i data-lucide="file-spreadsheet"></i>' +
+                    '  <p class="empty-title">' + t('emptyReport') + '</p>' +
+                    '  <p class="empty-sub">' + t('emptyReportSub') + '</p>' +
+                    '</div></div>';
+                refreshIcons();
+                return;
+            }
+
+            var rows = '';
+            getGroupedEntries(filtered).forEach(function (group) {
+                var clientName = group[0];
+                var clientTasks = group[1];
+                var clientTotal = clientTasks.reduce(function (sum, t) { return sum + parseFloat(t.hours || 0); }, 0);
+
+                rows +=
+                    '<tr class="client-row">' +
+                    '  <td colspan="5">' + esc(clientName) + '</td>' +
+                    '  <td class="num client-total">&Sigma; ' + clientTotal.toFixed(1) + 'h</td>' +
+                    '</tr>';
+
+                clientTasks.forEach(function (e) {
+                    var hours = parseFloat(e.hours || 0);
+                    var d = new Date(e.date);
+                    var dateLabel = isNaN(d) ? '-' : d.toLocaleDateString(state.lang === 'id' ? 'id-ID' : 'en-US', { day: '2-digit', month: '2-digit' });
+                    rows +=
+                        '<tr class="data-row">' +
+                        '  <td class="cell-date">' + dateLabel + '</td>' +
+                        '  <td class="cell-client">' + esc(e.client) + '</td>' +
+                        '  <td class="cell-job">' + esc(e.jobTitle || '-') + '</td>' +
+                        '  <td class="cell-task">' + esc(e.task) + '</td>' +
+                        '  <td class="cell-assoc">' + esc(e.associates) + '</td>' +
+                        '  <td class="num">' +
+                        '    <div class="cell-hours' + (!e.endTime ? ' running' : '') + '">' + hours.toFixed(1) + 'h</div>' +
+                        '    <div class="cell-times">' + (e.endTime ? esc(e.startTime) + ' – ' + esc(e.endTime) : (state.lang==='id'?'Mulai: ':'Start: ') + esc(e.startTime)) + '</div>' +
+                        '  </td>' +
+                        '</tr>';
+                });
+            });
+
+            tableCard.innerHTML =
+                '<div class="table-scroll">' +
+                '  <table class="report-table">' +
+                '    <thead><tr>' +
+                '      <th>' + t('thDate') + '</th><th>' + t('thClient') + '</th><th>' + t('thJob') + '</th><th>' + t('thTask') + '</th><th>' + t('thAssoc') + '</th><th class="num">' + t('thTime') + '</th>' +
+                '    </tr></thead>' +
+                '    <tbody>' + rows + '</tbody>' +
+                '  </table>' +
+                '</div>' +
+                '<div class="report-footer">' + t('endReport') + '</div>';
+            refreshIcons();
+        }
+
+        function refreshDynamic() {
+            renderEntryList();
+            renderReport();
+            updateStatusBar();
+        }
+
+        /* =====================================================
+           Actions
+           ===================================================== */
+        function setSubmitting(on) {
+            state.isSubmitting = on;
+            var btn = $('#submit-btn');
+            if (!btn) return;
+            btn.disabled = on;
+            btn.innerHTML = on
+                ? '<span class="spinner"></span> ' + t('btnSaving')
+                : '<i data-lucide="save"></i> ' + t('btnSave');
+            refreshIcons();
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+            if (state.isSubmitting) return;
+            if (!state.user || !state.firebaseReady) {
+                showInfoModal(t('errConnect'));
+                return;
+            }
+
+            var client = $('#f-client').value.trim();
+            var date = $('#f-date').value;
+            var startTime = $('#f-start').value;
+            var endTime = $('#f-end').value;
+            var associates = $('#f-assoc').value.trim();
+            var jobTitle = $('#f-job').value.trim();
+            var task = $('#f-task').value.trim();
+
+            var newEntry = {
+                client: client.toUpperCase(),
+                jobTitle: jobTitle,
+                task: task,
+                date: date,
+                startTime: startTime,
+                endTime: endTime || '', 
+                hours: endTime ? calcHours(startTime, endTime) : 0,
+                associates: associates || '-',
+                author: state.userName,
+                userId: state.user.uid,
+                createdAt: new Date().toISOString()
+            };
+
+            setSubmitting(true);
+            var fs = window.FirebaseServices;
+            try {
+                await fs.addDoc(fs.collection(fs.db, 'artifacts', fs.appId, 'public', 'data', safeCollectionKey(state.accessKey)), newEntry);
+                $('#f-client').value = '';
+                $('#f-job').value = '';
+                $('#f-task').value = '';
+                $('#f-assoc').value = '';
+                $('#f-end').value = '';
+                $('#f-start').value = getCurrentTime();
+                showToast(t('toastSaved'));
+            } catch (err) {
+                console.error('Submit Error:', err);
+                showInfoModal(t('syncErr'));
+            } finally {
+                setSubmitting(false);
+            }
+        }
+
+        function openFinishModal(entry) {
+            var overlay = openModal(
+                '<div class="modal-icon"><i data-lucide="check-circle-2"></i></div>' +
+                '<h4 class="modal-title">' + t('modalFinish') + '</h4>' +
+                '<p class="modal-sub">' + esc(entry.jobTitle || entry.client) + '</p>' +
+                '<div class="modal-fields">' +
+                '  <div class="field">' +
+                '    <label class="label">' + t('fDate') + '</label>' +
+                '    <input id="fm-date" type="date" value="' + esc(entry.date) + '">' +
+                '  </div>' +
+                '  <div class="field">' +
+                '    <label class="label">' + t('fStart') + '</label>' +
+                '    <input id="fm-start" type="time" value="' + esc(entry.startTime) + '">' +
+                '  </div>' +
+                '  <div class="field">' +
+                '    <label class="label">' + t('fEnd') + '</label>' +
+                '    <input id="fm-end" type="time" class="input-optional" value="' + getCurrentTime() + '">' +
+                '  </div>' +
+                '  <p class="modal-hint">' + t('modalHint') + '</p>' +
+                '</div>' +
+                '<div class="modal-actions">' +
+                '  <button type="button" class="btn btn-ghost" data-modal-cancel>' + t('modalCancel') + '</button>' +
+                '  <button type="button" class="btn btn-primary" data-modal-save>' + t('btnSave') + '</button>' +
+                '</div>'
+            );
+
+            overlay.querySelector('[data-modal-cancel]').addEventListener('click', function () { closeModal(overlay); });
+            overlay.querySelector('[data-modal-save]').addEventListener('click', async function () {
+                var date = overlay.querySelector('#fm-date').value;
+                var startTime = overlay.querySelector('#fm-start').value;
+                var endTime = overlay.querySelector('#fm-end').value;
+                if (!date || !startTime || !endTime) {
+                    showInfoModal(t('errIncomplete'));
+                    return;
+                }
+
+                var calculatedHours = calcHours(startTime, endTime);
+                // Adjust if cross midnight (simple heuristic)
+                if (endTime < startTime) {
+                    var start = new Date(date + 'T' + startTime + ':00');
+                    var nextDay = new Date(start);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    var end = new Date(nextDay.toISOString().split('T')[0] + 'T' + endTime + ':00');
+                    calculatedHours = (end - start) / 3600000;
+                }
+
+                var fs = window.FirebaseServices;
+                try {
+                    var docRef = fs.doc(fs.db, 'artifacts', fs.appId, 'public', 'data', safeCollectionKey(state.accessKey), entry.id);
+                    await fs.updateDoc(docRef, {
+                        date: date,
+                        startTime: startTime,
+                        endTime: endTime,
+                        hours: parseFloat(calculatedHours.toFixed(2))
+                    });
+                    closeModal(overlay);
+                    showToast(t('toastFinished'));
+                } catch (err) {
+                    console.error(err);
+                    showInfoModal(t('syncErr'));
+                }
+            });
+        }
+
+        function openEditModal(entry) {
+            var overlay = openModal(
+                '<div class="modal-icon"><i data-lucide="pencil-line"></i></div>' +
+                '<h4 class="modal-title">' + t('modalEdit') + '</h4>' +
+                '<div class="modal-fields">' +
+                '  <div class="field">' +
+                '    <label class="label">' + t('fClient') + '</label>' +
+                '    <input id="me-client" type="text" value="' + esc(entry.client) + '">' +
+                '  </div>' +
+                '  <div class="field-row">' +
+                '    <div class="field"><label class="label">' + t('fDate') + '</label><input id="me-date" type="date" value="' + esc(entry.date) + '"></div>' +
+                '    <div class="field"><label class="label">' + t('fAssoc') + '</label><input id="me-assoc" type="text" value="' + esc(entry.associates) + '"></div>' +
+                '  </div>' +
+                '  <div class="field-row">' +
+                '    <div class="field"><label class="label">' + t('fStart') + '</label><input id="me-start" type="time" value="' + esc(entry.startTime) + '"></div>' +
+                '    <div class="field"><label class="label">' + t('fEnd') + '</label><input id="me-end" type="time" class="' + (!entry.endTime ? 'input-optional' : '') + '" value="' + esc(entry.endTime || '') + '"></div>' +
+                '  </div>' +
+                '  <div class="field">' +
+                '    <label class="label">' + t('fJob') + '</label>' +
+                '    <input id="me-job" type="text" value="' + esc(entry.jobTitle || '') + '">' +
+                '  </div>' +
+                '  <div class="field">' +
+                '    <label class="label">' + t('fTask') + '</label>' +
+                '    <textarea id="me-task">' + esc(entry.task) + '</textarea>' +
+                '  </div>' +
+                '</div>' +
+                '<div class="modal-actions">' +
+                '  <button type="button" class="btn btn-ghost" data-modal-cancel>' + t('modalCancel') + '</button>' +
+                '  <button type="button" class="btn btn-primary" data-modal-save>' + t('btnSave') + '</button>' +
+                '</div>'
+            );
+
+            overlay.querySelector('[data-modal-cancel]').addEventListener('click', function () { closeModal(overlay); });
+            overlay.querySelector('[data-modal-save]').addEventListener('click', async function () {
+                var client = overlay.querySelector('#me-client').value.trim();
+                var date = overlay.querySelector('#me-date').value;
+                var associates = overlay.querySelector('#me-assoc').value.trim();
+                var startTime = overlay.querySelector('#me-start').value;
+                var endTime = overlay.querySelector('#me-end').value;
+                var jobTitle = overlay.querySelector('#me-job').value.trim();
+                var task = overlay.querySelector('#me-task').value.trim();
+
+                if (!client || !date || !startTime || !jobTitle || !task) {
+                    showInfoModal(state.lang==='id'?'Mohon lengkapi field yang wajib.':'Please complete required fields.');
+                    return;
+                }
+
+                var calculatedHours = 0;
+                if (endTime) {
+                    calculatedHours = calcHours(startTime, endTime);
+                    if (endTime < startTime) {
+                        var start = new Date(date + 'T' + startTime + ':00');
+                        var nextDay = new Date(start);
+                        nextDay.setDate(nextDay.getDate() + 1);
+                        var end = new Date(nextDay.toISOString().split('T')[0] + 'T' + endTime + ':00');
+                        calculatedHours = (end - start) / 3600000;
+                    }
+                }
+
+                var fs = window.FirebaseServices;
+                try {
+                    var docRef = fs.doc(fs.db, 'artifacts', fs.appId, 'public', 'data', safeCollectionKey(state.accessKey), entry.id);
+                    await fs.updateDoc(docRef, {
+                        client: client.toUpperCase(),
+                        date: date,
+                        associates: associates || '-',
+                        startTime: startTime,
+                        endTime: endTime || '',
+                        jobTitle: jobTitle,
+                        task: task,
+                        hours: parseFloat(calculatedHours.toFixed(2))
+                    });
+                    closeModal(overlay);
+                    showToast(t('toastUpdated'));
+                } catch (err) {
+                    console.error(err);
+                    showInfoModal(t('syncErr'));
+                }
+            });
+        }
+
+        function handleDelete(id) {
+            showConfirm(t('modalDeleteTxt'), t('modalDeleteBtn'), async function () {
+                var fs = window.FirebaseServices;
+                try {
+                    await fs.deleteDoc(fs.doc(fs.db, 'artifacts', fs.appId, 'public', 'data', safeCollectionKey(state.accessKey), id));
+                    showToast(t('toastDeleted'), 'trash-2');
+                } catch (err) {
+                    showInfoModal(t('syncErr'));
+                }
+            });
+        }
+
+        function handleLogout() {
+            showConfirm(t('modalLogoutTxt'), t('modalLogoutBtn'), function () {
+                localStorage.removeItem('woker_access_key');
+                localStorage.removeItem('woker_user_name');
+                if (state.unsubscribe) { state.unsubscribe(); state.unsubscribe = null; }
+                state.subscribedKey = null;
+                state.isLoggedIn = false;
+                state.accessKey = '';
+                state.userName = '';
+                state.entries = [];
+                state.hasLoadedOnce = false;
+                state.activeTab = 'input';
+                render();
+            });
+        }
+
+        /* ---------- Excel export (Multi-Month) ---------- */
+        function exportExcel() {
+            if (state.entries.length === 0) {
+                showToast(t('exportEmpty'), 'alert-circle');
+                return;
+            }
+
+            // Group strictly by YYYY-MM
+            var grouped = {};
+            state.entries.forEach(function(e) {
+                var d = new Date(e.date);
+                if (isNaN(d)) return;
+                var k = d.getFullYear() + '-' + String(d.getMonth()).padStart(2, '0');
+                if (!grouped[k]) grouped[k] = { entries: [], month: d.getMonth(), year: d.getFullYear() };
+                grouped[k].entries.push(e);
+            });
+
+            var keys = Object.keys(grouped).sort(function(a, b) { return b.localeCompare(a); });
+            if (keys.length === 0) {
+                showToast(t('exportEmpty'), 'alert-circle');
+                return;
+            }
+
+            var wb = XLSX.utils.book_new();
+
+            keys.forEach(function(k) {
+                var group = grouped[k];
+                var monthNameIndo = i18n['id'].months[group.month]; 
+                var sheetName = monthNameIndo + ' ' + group.year;
+                var totalHours = getTotalHours(group.entries);
+                var safeUserName = state.userName || 'User';
+
+                var wsData = [
+                    ["TIMESHEET REPORT"],
+                    ["NAMA", ":", safeUserName],
+                    ["BULAN", ":", sheetName],
+                    ["KODE ID", ":", state.accessKey],
+                    [],
+                    ["TANGGAL", "KLIEN", "PEKERJAAN", "DETAIL PEKERJAAN", "ASSOCIATES", "WAKTU MULAI", "WAKTU SELESAI", "DURASI (JAM)"]
+                ];
+
+                var sortedEntries = group.entries.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+
+                sortedEntries.forEach(function(e) {
+                    wsData.push([
+                        e.date,
+                        e.client,
+                        e.jobTitle || '-',
+                        e.task,
+                        e.associates || '-',
+                        e.startTime || '-',
+                        e.endTime || 'Masih Berjalan',
+                        e.hours
+                    ]);
+                });
+
+                wsData.push([]);
+                wsData.push(["", "", "", "", "", "", "TOTAL JAM", totalHours.toFixed(1)]);
+
+                var ws = XLSX.utils.aoa_to_sheet(wsData);
+                ws['!cols'] = [
+                    { wch: 12 }, { wch: 25 }, { wch: 25 }, { wch: 50 }, { wch: 20 }, { wch: 15 }, { wch: 15 }, { wch: 15 }
+                ];
+                
+                // Keep sheetName under 31 characters limit of Excel
+                XLSX.utils.book_append_sheet(wb, ws, sheetName.substring(0, 31));
+            });
+
+            var today = new Date();
+            var yyyy = today.getFullYear();
+            var mm = String(today.getMonth() + 1).padStart(2, '0');
+            var dd = String(today.getDate()).padStart(2, '0');
+            var safeUserName = state.userName || 'User';
+            var fileName = yyyy + '.' + mm + '.' + dd + ' - [TIMESHEET] ' + safeUserName + '.xlsx';
+
+            XLSX.writeFile(wb, fileName);
+            showToast(t('exportSuccess'), 'download');
+        }
+
+        /* =====================================================
+           Router + init
+           ===================================================== */
+        function render() {
+            if (!state.isLoggedIn) { renderLogin(); return; }
+            if (!state.userName) { renderName(); return; }
+            renderApp();
+        }
+
+        render();
+        bootFirebase();
+    })();
+    </script>
+</body>
+</html>        /* Smooth Scrollbar */
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: #f8fafc; }
         ::-webkit-scrollbar-thumb { background: var(--midnight-1); border-radius: 10px; }
