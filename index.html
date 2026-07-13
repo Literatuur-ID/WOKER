@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -686,6 +686,24 @@
         .modal-actions { display: flex; gap: var(--sp-3); margin-top: var(--sp-6); }
         .modal-actions .btn { flex: 1; padding-top: var(--sp-4); padding-bottom: var(--sp-4); }
 
+        /* ---------- Import from Excel ---------- */
+        .modal-panel.modal-wide { max-width: 760px; }
+        .import-list { display: flex; flex-direction: column; gap: var(--sp-3); max-height: 46vh; overflow-y: auto; padding: var(--sp-1); text-align: left; }
+        .import-row { display: flex; gap: var(--sp-3); align-items: flex-start; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--sp-3); transition: opacity .2s var(--ease), border-color .2s var(--ease); }
+        .import-row.excluded { opacity: .45; }
+        .import-row.invalid { border-color: var(--danger); }
+        .import-row > input[type="checkbox"] { width: 18px; height: 18px; margin-top: 10px; accent-color: var(--accent); flex-shrink: 0; cursor: pointer; }
+        .import-grid { flex: 1; display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-2); min-width: 0; }
+        .import-grid input, .import-grid textarea {
+            width: 100%; padding: 8px 10px; background: var(--card); border: 1px solid var(--border);
+            border-radius: var(--r-sm); font-size: 13px; font-weight: 600; color: var(--text); outline: none;
+        }
+        .import-grid input:focus, .import-grid textarea:focus { border-color: var(--accent); }
+        .import-grid textarea { grid-column: 1 / -1; resize: vertical; min-height: 44px; font-weight: 500; line-height: 1.5; }
+        .badge-dup { grid-column: 1 / -1; justify-self: start; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; color: #c2410c; background: var(--warning-soft); border: 1px solid var(--warning-border); border-radius: var(--r-pill); padding: 3px 10px; }
+        [data-theme="dark"] .badge-dup { color: var(--warning); }
+        @media (max-width: 560px) { .import-grid { grid-template-columns: 1fr; } }
+
         #toast-root { position: fixed; bottom: var(--sp-6); left: 50%; transform: translateX(-50%); z-index: 1100; display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); pointer-events: none; width: max-content; max-width: calc(100vw - 48px); }
         .toast { display: flex; align-items: center; gap: var(--sp-2); background: var(--text); color: var(--bg); border-radius: var(--r-pill); padding: var(--sp-3) var(--sp-5); font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .1em; box-shadow: var(--shadow-lg); opacity: 0; transform: translateY(12px); transition: opacity .25s var(--ease), transform .25s var(--ease); }
         .toast.show { opacity: 1; transform: translateY(0); }
@@ -817,6 +835,16 @@
                 errLength: "Nama minimal 2 karakter.",
                 errConnect: "Gagal menyimpan. Aplikasi belum terhubung ke database Cloud.",
                 errIncomplete: "Mohon lengkapi Tanggal, Waktu Mulai, dan Waktu Selesai.",
+                btnImport: "Impor Excel",
+                importTitle: "Impor dari Excel",
+                importSub: "{count} entri terdeteksi dari “{file}”. Periksa, ubah, atau hapus centang sebelum disimpan.",
+                importNone: "Tidak ada tabel timesheet yang dikenali dalam file ini. Pastikan terdapat kolom Tanggal, Klien, dan Pekerjaan/Detail Pekerjaan.",
+                importReadErr: "Gagal membaca file Excel.",
+                importConfirm: "Impor {count} Entri",
+                importing: "Mengimpor...",
+                importDone: "{count} entri berhasil diimpor",
+                importDup: "Kemungkinan duplikat",
+                importInvalid: "Entri yang ditandai merah belum lengkap (Klien, Tanggal, dan Pekerjaan/Detail wajib diisi). Perbaiki atau hapus centangnya.",
                 months: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
             },
             en: {
@@ -893,6 +921,16 @@
                 errLength: "Name must be at least 2 characters.",
                 errConnect: "Failed to save. Application is not connected to Cloud database.",
                 errIncomplete: "Please complete Date, Start Time, and End Time.",
+                btnImport: "Import Excel",
+                importTitle: "Import from Excel",
+                importSub: "{count} entries detected from “{file}”. Review, edit, or untick before saving.",
+                importNone: "No recognizable timesheet table found in this file. Make sure it has Date, Client, and Job/Task columns.",
+                importReadErr: "Failed to read the Excel file.",
+                importConfirm: "Import {count} Entries",
+                importing: "Importing...",
+                importDone: "{count} entries imported",
+                importDup: "Possible duplicate",
+                importInvalid: "Entries marked red are incomplete (Client, Date, and Job/Task are required). Fix or untick them.",
                 months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
             }
         };
@@ -950,7 +988,7 @@
             isLoggedIn: !!localStorage.getItem('woker_access_key'),
             accessKey: localStorage.getItem('woker_access_key') || '',
             userName: localStorage.getItem('woker_user_name') || '',
-            lang: localStorage.getItem('woker_lang') || 'id',
+            lang: localStorage.getItem('woker_lang') || 'en',
             dark: localStorage.getItem('woker_dark') === 'true',
 
             entries: [],
@@ -1312,7 +1350,7 @@
                 '            <h3 class="form-title"><i data-lucide="briefcase"></i> ' + t('formTitle') + '</h3>' +
                 '            <div class="field">' +
                 '              <label class="label" for="f-client">' + t('fClient') + '</label>' +
-                '              <input id="f-client" type="text" required placeholder="' + t('fClientPh') + '">' +
+                '              <input id="f-client" type="text" required list="dl-client" placeholder="' + t('fClientPh') + '">' +
                 '            </div>' +
                 '            <div class="field">' +
                 '              <label class="label" for="f-date">' + t('fDate') + '</label>' +
@@ -1331,11 +1369,11 @@
                 '            </div>' +
                 '            <div class="field">' +
                 '              <label class="label" for="f-assoc">' + t('fAssoc') + '</label>' +
-                '              <input id="f-assoc" type="text" placeholder="' + t('fAssocPh') + '">' +
+                '              <input id="f-assoc" type="text" list="dl-assoc" placeholder="' + t('fAssocPh') + '">' +
                 '            </div>' +
                 '            <div class="field">' +
                 '              <label class="label" for="f-job">' + t('fJob') + '</label>' +
-                '              <input id="f-job" type="text" required placeholder="' + t('fJobPh') + '">' +
+                '              <input id="f-job" type="text" required list="dl-job" placeholder="' + t('fJobPh') + '">' +
                 '            </div>' +
                 '            <div class="field">' +
                 '              <label class="label" for="f-task">' + t('fTask') + '</label>' +
@@ -1344,8 +1382,15 @@
                 '            <button type="submit" id="submit-btn" class="btn btn-primary btn-block">' +
                 '              <i data-lucide="save"></i> ' + t('btnSave') +
                 '            </button>' +
+                '            <button type="button" id="import-btn" class="btn btn-ghost btn-block">' +
+                '              <i data-lucide="file-up"></i> ' + t('btnImport') +
+                '            </button>' +
                 '            <p id="form-status" class="form-status"></p>' +
                 '          </form>' +
+                '          <input type="file" id="import-file" accept=".xlsx,.xls,.csv" hidden>' +
+                '          <datalist id="dl-client"></datalist>' +
+                '          <datalist id="dl-assoc"></datalist>' +
+                '          <datalist id="dl-job"></datalist>' +
                 '        </div>' +
                 '        <div class="list-col">' +
                 '          <div class="list-head">' +
@@ -1372,6 +1417,7 @@
             updateConnectionUI();
             renderEntryList();
             renderReport();
+            updateDatalists();
             setActiveTab(state.activeTab);
             refreshIcons();
         };
@@ -1401,6 +1447,13 @@
             });
 
             $('#entry-form').addEventListener('submit', handleSubmit);
+
+            $('#import-btn').addEventListener('click', function () { $('#import-file').click(); });
+            $('#import-file').addEventListener('change', function (e) {
+                var file = e.target.files && e.target.files[0];
+                e.target.value = '';
+                if (file) handleImportFile(file);
+            });
 
             $('#entry-list').addEventListener('click', function (e) {
                 var finishBtn = e.target.closest('[data-action="finish"]');
@@ -1628,10 +1681,36 @@
             refreshIcons();
         };
 
+        /* ---------- Autocomplete suggestions (from entry history) ---------- */
+        var updateDatalists = function() {
+            var fill = function(sel, values) {
+                var dl = $(sel);
+                if (!dl) return;
+                dl.innerHTML = values.map(function (v) {
+                    return '<option value="' + esc(v) + '"></option>';
+                }).join('');
+            };
+            var uniqueValues = function(getter) {
+                var seen = {};
+                var out = [];
+                state.entries.forEach(function (e) {
+                    var v = String(getter(e) || '').trim();
+                    if (!v || v === '-') return;
+                    var k = v.toLowerCase();
+                    if (!seen[k]) { seen[k] = true; out.push(v); }
+                });
+                return out.sort(function (a, b) { return a.localeCompare(b); });
+            };
+            fill('#dl-client', uniqueValues(function (e) { return e.client; }));
+            fill('#dl-assoc', uniqueValues(function (e) { return e.associates; }));
+            fill('#dl-job', uniqueValues(function (e) { return e.jobTitle; }));
+        };
+
         var refreshDynamic = function() {
             renderEntryList();
             renderReport();
             updateStatusBar();
+            updateDatalists();
         };
 
         /* =====================================================
@@ -1768,11 +1847,11 @@
                 '<div class="modal-fields">' +
                 '  <div class="field">' +
                 '    <label class="label">' + t('fClient') + '</label>' +
-                '    <input id="me-client" type="text" value="' + esc(entry.client) + '">' +
+                '    <input id="me-client" type="text" list="dl-client" value="' + esc(entry.client) + '">' +
                 '  </div>' +
                 '  <div class="field-row">' +
                 '    <div class="field"><label class="label">' + t('fDate') + '</label><input id="me-date" type="date" value="' + esc(entry.date) + '"></div>' +
-                '    <div class="field"><label class="label">' + t('fAssoc') + '</label><input id="me-assoc" type="text" value="' + esc(entry.associates) + '"></div>' +
+                '    <div class="field"><label class="label">' + t('fAssoc') + '</label><input id="me-assoc" type="text" list="dl-assoc" value="' + esc(entry.associates) + '"></div>' +
                 '  </div>' +
                 '  <div class="field-row">' +
                 '    <div class="field"><label class="label">' + t('fStart') + '</label><input id="me-start" type="time" value="' + esc(entry.startTime) + '"></div>' +
@@ -1780,7 +1859,7 @@
                 '  </div>' +
                 '  <div class="field">' +
                 '    <label class="label">' + t('fJob') + '</label>' +
-                '    <input id="me-job" type="text" value="' + esc(entry.jobTitle || '') + '">' +
+                '    <input id="me-job" type="text" list="dl-job" value="' + esc(entry.jobTitle || '') + '">' +
                 '  </div>' +
                 '  <div class="field">' +
                 '    <label class="label">' + t('fTask') + '</label>' +
@@ -1870,6 +1949,252 @@
             });
         };
 
+        /* ---------- Excel import ---------- */
+        var pad2 = function(n) { return String(n).padStart(2, '0'); };
+
+        var parseImportDate = function(v) {
+            if (v == null || v === '') return '';
+            if (v instanceof Date && !isNaN(v)) {
+                return v.getFullYear() + '-' + pad2(v.getMonth() + 1) + '-' + pad2(v.getDate());
+            }
+            if (typeof v === 'number') {
+                var dc = XLSX.SSF.parse_date_code(v);
+                return (dc && dc.y) ? dc.y + '-' + pad2(dc.m) + '-' + pad2(dc.d) : '';
+            }
+            var s = String(v).trim();
+            var m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+            if (m) return m[1] + '-' + pad2(m[2]) + '-' + pad2(m[3]);
+            m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/);
+            if (m) return m[3] + '-' + pad2(m[2]) + '-' + pad2(m[1]);
+            var d = new Date(s);
+            return isNaN(d) ? '' : d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+        };
+
+        var parseImportTime = function(v) {
+            if (v == null || v === '') return '';
+            if (v instanceof Date && !isNaN(v)) return pad2(v.getHours()) + ':' + pad2(v.getMinutes());
+            if (typeof v === 'number') {
+                var mins = Math.round((v % 1) * 24 * 60);
+                return pad2(Math.floor(mins / 60) % 24) + ':' + pad2(mins % 60);
+            }
+            var m = String(v).trim().match(/^(\d{1,2})[:.](\d{2})/);
+            return m ? pad2(m[1]) + ':' + m[2] : '';
+        };
+
+        // Column recognition: order matters — "detail" patterns must claim their
+        // column before the broader job/task patterns get a chance.
+        var IMPORT_COL_DEFS = [
+            { key: 'task',   re: /detail|desc|uraian/i },
+            { key: 'date',   re: /tanggal|tgl|date/i },
+            { key: 'client', re: /klien|client/i },
+            { key: 'assoc',  re: /assoc/i },
+            { key: 'start',  re: /mulai|start/i },
+            { key: 'end',    re: /selesai|end|finish/i },
+            { key: 'hours',  re: /durasi|duration|hours|jam/i },
+            { key: 'job',    re: /pekerjaan|job|task/i }
+        ];
+
+        var findImportHeader = function(rows) {
+            for (var r = 0; r < Math.min(rows.length, 30); r++) {
+                var row = rows[r] || [];
+                var map = {};
+                for (var c = 0; c < row.length; c++) {
+                    var cell = String(row[c] == null ? '' : row[c]).trim();
+                    if (!cell) continue;
+                    for (var i = 0; i < IMPORT_COL_DEFS.length; i++) {
+                        var def = IMPORT_COL_DEFS[i];
+                        if (map[def.key] == null && def.re.test(cell)) { map[def.key] = c; break; }
+                    }
+                }
+                if (map.date != null && map.client != null && (map.task != null || map.job != null)) {
+                    return { row: r, map: map };
+                }
+            }
+            return null;
+        };
+
+        var parseWorkbook = function(wb) {
+            var items = [];
+            wb.SheetNames.forEach(function (name) {
+                var ws = wb.Sheets[name];
+                if (!ws) return;
+                var rows;
+                try { rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: '' }); }
+                catch (e) { return; }
+                var hdr = findImportHeader(rows);
+                if (!hdr) return;
+                var map = hdr.map;
+                for (var r = hdr.row + 1; r < rows.length; r++) {
+                    var row = rows[r] || [];
+                    var client = String(row[map.client] == null ? '' : row[map.client]).trim();
+                    var date = parseImportDate(row[map.date]);
+                    var job = map.job != null ? String(row[map.job] || '').trim() : '';
+                    var task = map.task != null ? String(row[map.task] || '').trim() : '';
+                    var assoc = map.assoc != null ? String(row[map.assoc] || '').trim() : '';
+                    var start = map.start != null ? parseImportTime(row[map.start]) : '';
+                    var end = map.end != null ? parseImportTime(row[map.end]) : '';
+
+                    if (!client && !date && !job && !task) continue;
+                    if (/^total/i.test(client)) continue;
+                    if (job === '-') job = '';
+                    if (task === '-') task = '';
+                    if (assoc === '-') assoc = '';
+
+                    items.push({
+                        client: client, date: date, jobTitle: job, task: task,
+                        associates: assoc, startTime: start, endTime: end
+                    });
+                }
+            });
+            return items;
+        };
+
+        var handleImportFile = function(file) {
+            if (!state.user || !state.firebaseReady) { showInfoModal(t('errConnect')); return; }
+            var reader = new FileReader();
+            reader.onload = function (ev) {
+                try {
+                    var wb = XLSX.read(new Uint8Array(ev.target.result), { type: 'array', cellDates: true });
+                    var items = parseWorkbook(wb);
+                    if (items.length === 0) { showInfoModal(t('importNone')); return; }
+                    openImportModal(items, file.name);
+                } catch (err) {
+                    console.error('Import parse error:', err);
+                    showInfoModal(t('importReadErr'));
+                }
+            };
+            reader.onerror = function () { showInfoModal(t('importReadErr')); };
+            reader.readAsArrayBuffer(file);
+        };
+
+        var openImportModal = function(items, fileName) {
+            var existing = {};
+            state.entries.forEach(function (e) {
+                existing[(e.date || '') + '|' + String(e.client || '').toUpperCase() + '|' + String(e.task || '').trim().toLowerCase()] = true;
+            });
+
+            var rowsHTML = items.map(function (it, i) {
+                var dup = !!existing[(it.date || '') + '|' + it.client.toUpperCase() + '|' + it.task.toLowerCase()];
+                return (
+                    '<div class="import-row' + (dup ? ' excluded' : '') + '" data-idx="' + i + '">' +
+                    '  <input type="checkbox" class="import-include"' + (dup ? '' : ' checked') + '>' +
+                    '  <div class="import-grid">' +
+                    '    <input type="date" data-f="date" value="' + esc(it.date) + '">' +
+                    '    <input type="text" data-f="client" list="dl-client" placeholder="' + t('fClient') + '" value="' + esc(it.client) + '">' +
+                    '    <input type="time" data-f="start" value="' + esc(it.startTime) + '">' +
+                    '    <input type="time" data-f="end" value="' + esc(it.endTime) + '">' +
+                    '    <input type="text" data-f="job" list="dl-job" placeholder="' + t('fJob') + '" value="' + esc(it.jobTitle) + '">' +
+                    '    <input type="text" data-f="assoc" list="dl-assoc" placeholder="' + t('fAssoc') + '" value="' + esc(it.associates) + '">' +
+                    '    <textarea data-f="task" rows="2" placeholder="' + t('fTask') + '">' + esc(it.task) + '</textarea>' +
+                         (dup ? '<span class="badge-dup">' + t('importDup') + '</span>' : '') +
+                    '  </div>' +
+                    '</div>'
+                );
+            }).join('');
+
+            var overlay = openModal(
+                '<div class="modal-icon"><i data-lucide="file-up"></i></div>' +
+                '<h4 class="modal-title">' + t('importTitle') + '</h4>' +
+                '<p class="modal-sub">' + t('importSub', { count: items.length, file: esc(fileName) }) + '</p>' +
+                '<div class="import-list">' + rowsHTML + '</div>' +
+                '<div class="modal-actions">' +
+                '  <button type="button" class="btn btn-ghost" data-modal-cancel>' + t('modalCancel') + '</button>' +
+                '  <button type="button" class="btn btn-primary" data-modal-import></button>' +
+                '</div>'
+            );
+            overlay.querySelector('.modal-panel').classList.add('modal-wide');
+
+            var importBtn = overlay.querySelector('[data-modal-import]');
+            var busy = false;
+            var updateCount = function () {
+                var n = overlay.querySelectorAll('.import-include:checked').length;
+                importBtn.innerHTML = '<i data-lucide="file-up"></i> ' + t('importConfirm', { count: n });
+                importBtn.disabled = n === 0;
+                refreshIcons();
+            };
+            updateCount();
+
+            overlay.addEventListener('change', function (e) {
+                if (e.target.classList.contains('import-include')) {
+                    e.target.closest('.import-row').classList.toggle('excluded', !e.target.checked);
+                    updateCount();
+                }
+            });
+
+            overlay.querySelector('[data-modal-cancel]').addEventListener('click', function () {
+                if (!busy) closeModal(overlay);
+            });
+
+            importBtn.addEventListener('click', async function () {
+                if (busy) return;
+                var selected = [];
+                var hasInvalid = false;
+                overlay.querySelectorAll('.import-row').forEach(function (rowEl) {
+                    rowEl.classList.remove('invalid');
+                    if (!rowEl.querySelector('.import-include').checked) return;
+                    var get = function (f) {
+                        var el = rowEl.querySelector('[data-f="' + f + '"]');
+                        return el ? el.value.trim() : '';
+                    };
+                    var item = {
+                        client: get('client'), date: get('date'), startTime: get('start'),
+                        endTime: get('end'), jobTitle: get('job'), associates: get('assoc'), task: get('task')
+                    };
+                    if (!item.client || !item.date || (!item.jobTitle && !item.task)) {
+                        hasInvalid = true;
+                        rowEl.classList.add('invalid');
+                        return;
+                    }
+                    selected.push(item);
+                });
+
+                if (hasInvalid) { showInfoModal(t('importInvalid')); return; }
+                if (selected.length === 0) return;
+
+                busy = true;
+                importBtn.disabled = true;
+                importBtn.innerHTML = '<span class="spinner"></span> ' + t('importing');
+
+                var fs = window.FirebaseServices;
+                var colRef = fs.collection(fs.db, 'artifacts', fs.appId, 'public', 'data', safeCollectionKey(state.accessKey));
+                try {
+                    await Promise.all(selected.map(function (it) {
+                        return fs.addDoc(colRef, {
+                            client: it.client.toUpperCase(),
+                            jobTitle: it.jobTitle,
+                            task: it.task,
+                            date: it.date,
+                            startTime: it.startTime,
+                            endTime: it.endTime || '',
+                            hours: (it.startTime && it.endTime) ? calcHours(it.startTime, it.endTime) : 0,
+                            associates: it.associates || '-',
+                            author: state.userName,
+                            userId: state.user.uid,
+                            createdAt: new Date().toISOString()
+                        });
+                    }));
+
+                    // Jump to the month of the newest imported entry so results are visible
+                    var newest = selected.map(function (x) { return x.date; }).sort().pop();
+                    var nd = new Date(newest);
+                    if (!isNaN(nd)) {
+                        state.currentMonth = nd.getMonth();
+                        state.currentYear = nd.getFullYear();
+                        updateMonthLabel();
+                        refreshDynamic();
+                    }
+                    closeModal(overlay);
+                    showToast(t('importDone', { count: selected.length }));
+                } catch (err) {
+                    console.error('Import Error:', err);
+                    showInfoModal(t('syncErr'));
+                    updateCount();
+                } finally {
+                    busy = false;
+                }
+            });
+        };
+
         /* ---------- Excel export (Multi-Month) ---------- */
         var exportExcel = function() {
             if (state.entries.length === 0) {
@@ -1937,6 +2262,60 @@
                 // Keep sheetName under 31 characters limit of Excel
                 XLSX.utils.book_append_sheet(wb, ws, sheetName.substring(0, 31));
             });
+
+            /* ---------- Recap sheet: work per client across all recorded months ---------- */
+            var recapEntries = state.entries.filter(function (e) { return !isNaN(new Date(e.date)); })
+                .sort(function (a, b) { return new Date(a.date) - new Date(b.date); });
+
+            if (recapEntries.length > 0) {
+                var monthsEn = i18n.en.months;
+                var firstD = new Date(recapEntries[0].date);
+                var lastD = new Date(recapEntries[recapEntries.length - 1].date);
+                var period;
+                if (firstD.getFullYear() !== lastD.getFullYear()) {
+                    period = monthsEn[firstD.getMonth()] + ' ' + firstD.getFullYear() + ' – ' + monthsEn[lastD.getMonth()] + ' ' + lastD.getFullYear();
+                } else if (firstD.getMonth() !== lastD.getMonth()) {
+                    period = monthsEn[firstD.getMonth()] + ' – ' + monthsEn[lastD.getMonth()] + ' ' + lastD.getFullYear();
+                } else {
+                    period = monthsEn[firstD.getMonth()] + ' ' + lastD.getFullYear();
+                }
+
+                var byClient = {};
+                recapEntries.forEach(function (e) {
+                    var name = e.client || '-';
+                    if (!byClient[name]) byClient[name] = { bullets: [], seen: {}, hours: 0 };
+                    var g = byClient[name];
+                    g.hours += parseFloat(e.hours || 0);
+                    var desc = ((e.jobTitle && e.jobTitle !== '-') ? e.jobTitle + ' — ' : '') + (e.task || '');
+                    desc = desc.trim();
+                    var dk = desc.toLowerCase();
+                    if (desc && !g.seen[dk]) { g.seen[dk] = true; g.bullets.push('• ' + desc); }
+                });
+
+                var recapData = [
+                    ["WORK RECAP BY CLIENT"],
+                    [(state.userName || 'User') + '  |  ID Code: ' + state.accessKey + '  |  Period: ' + period],
+                    [],
+                    ["NO", "CLIENT NAME / CODE", "BRIEF WORK DESCRIPTION", "TOTAL HOURS"]
+                ];
+
+                Object.keys(byClient).sort(function (a, b) { return a.localeCompare(b); }).forEach(function (name, idx) {
+                    var g = byClient[name];
+                    if (g.bullets.length === 0) {
+                        recapData.push([idx + 1, name, '-', parseFloat(g.hours.toFixed(2))]);
+                        return;
+                    }
+                    g.bullets.forEach(function (bullet, i) {
+                        recapData.push(i === 0
+                            ? [idx + 1, name, bullet, parseFloat(g.hours.toFixed(2))]
+                            : ["", "", bullet, ""]);
+                    });
+                });
+
+                var wsRecap = XLSX.utils.aoa_to_sheet(recapData);
+                wsRecap['!cols'] = [{ wch: 5 }, { wch: 32 }, { wch: 90 }, { wch: 12 }];
+                XLSX.utils.book_append_sheet(wb, wsRecap, "Recap");
+            }
 
             var today = new Date();
             var yyyy = today.getFullYear();
