@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#0f0e32">
+    <meta name="theme-color" content="#111845">
     
     <!-- 1. Judul Website -->
     <title>Woker</title>
@@ -12,9 +12,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Woker">
-    <link rel="icon" type="image/png" href="logo.png?v=2">
-    <link rel="apple-touch-icon" href="logo.png?v=2">
-    <link rel="shortcut icon" href="logo.png?v=2">
+    <link rel="icon" type="image/png" href="favicon.png?v=3">
+    <link rel="apple-touch-icon" href="favicon.png?v=3">
+    <link rel="shortcut icon" href="favicon.png?v=3">
 
     <!-- Libraries: spreadsheet export + icon set -->
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
@@ -32,28 +32,31 @@
            WOKER DESIGN TOKENS
            ===================================================== */
         :root {
-            /* Brand navy scale (darkest -> lightest) */
-            --navy-950: #0a0926;
-            --navy-900: #0f0e32;   
-            --navy-800: #161440;
-            --navy-700: #1b194f;
-            --navy-600: #232162;
-            --navy-500: #2c2a7b;   
+            /* Brand palette - LIGHT MODE: navy / indigo / blue-grey / white */
+            --navy-950: #0b0f30;
+            --navy-900: #111845;
+            --navy-800: #1a2258;
+            --navy-700: #232d6b;
+            --navy-600: #2e3a7e;
+            --navy-500: #3a4791;
 
-            --accent: var(--navy-500);
-            --accent-soft: #f0f4ff;
-            --accent-border: #c7d2fe;
+            --accent: #4a5695;
+            --accent-soft: #edeff7;
+            --accent-border: #c3cae4;
+            --focus-ring: rgba(74, 86, 149, 0.15);
+            --accent-ring: rgba(74, 86, 149, 0.3);
+            --accent-tint: rgba(74, 86, 149, 0.06);
 
             /* Neutral surfaces & text - LIGHT MODE (Default) */
-            --bg: #fcfcfd;
+            --bg: #f4f6fa;
             --card: #ffffff;
-            --surface: #f8fafc;
-            --border: #e2e8f0;
-            --border-light: #f1f5f9;
-            --text: #1e293b;
-            --text-soft: #475569;
-            --text-muted: #94a3b8;
-            --text-faint: #cbd5e1;
+            --surface: #eef1f7;
+            --border: #d9dfec;
+            --border-light: #e8ecf4;
+            --text: #111845;
+            --text-soft: #3d4577;
+            --text-muted: #7187b2;
+            --text-faint: #c0cade;
 
             /* Semantic colors */
             --success: #10b981;
@@ -73,10 +76,10 @@
             --r-xl: 28px; --r-2xl: 36px; --r-pill: 999px;
 
             /* Elevation */
-            --shadow-sm: 0 1px 3px rgb(15 14 50 / .06);
-            --shadow-md: 0 4px 20px -5px rgb(15 14 50 / .12);
-            --shadow-lg: 0 20px 50px -20px rgb(15 14 50 / .35);
-            --shadow-2xl: 0 25px 50px -12px rgb(15 14 50 / .25);
+            --shadow-sm: 0 1px 3px rgb(17 24 69 / .06);
+            --shadow-md: 0 4px 20px -5px rgb(17 24 69 / .12);
+            --shadow-lg: 0 20px 50px -20px rgb(17 24 69 / .35);
+            --shadow-2xl: 0 25px 50px -12px rgb(17 24 69 / .25);
 
             /* Typography */
             --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -87,23 +90,32 @@
 
         /* DARK MODE OVERRIDES - Premium, rich dark indigo palette */
         [data-theme="dark"] {
-            --bg: #090a0f;
-            --card: #11131c;
-            --surface: #181b28;
-            --border: #262a3d;
-            --border-light: #1c1f2e;
-            --text: #f8fafc;
-            --text-soft: #cbd5e1;
-            --text-muted: #64748b;
-            --text-faint: #475569;
-            
-            --navy-950: #050608;
-            --navy-900: #0a0c12; 
-            --navy-800: #12151e;
-            
-            --accent: #6366f1;
-            --accent-soft: rgba(99, 102, 241, 0.15);
-            --accent-border: rgba(99, 102, 241, 0.3);
+            /* Brand palette - DARK MODE: deep navy-black / dark indigo / slate blue / periwinkle
+               Wider lightness steps than before so card/surface/border read as distinct layers
+               instead of blending into the near-black background. Hue family unchanged. */
+            --bg: #05060f;
+            --card: #0c1130;
+            --surface: #171c44;
+            --border: #333b74;
+            --border-light: #1e2350;
+            --text: #f8f9fd;
+            --text-soft: #d3d6f0;
+            --text-muted: #9598cf;
+            --text-faint: #565e98;
+
+            --navy-950: #030410;
+            --navy-900: #0e1230;
+            --navy-800: #171c44;
+            --navy-700: #1f254f;
+            --navy-600: #2b3268;
+            --navy-500: #3a4390;
+
+            --accent: #adabe6;
+            --accent-soft: rgba(173, 171, 230, 0.16);
+            --accent-border: rgba(173, 171, 230, 0.34);
+            --focus-ring: rgba(173, 171, 230, 0.22);
+            --accent-ring: rgba(173, 171, 230, 0.4);
+            --accent-tint: rgba(173, 171, 230, 0.07);
 
             --warning-soft: rgba(249, 115, 22, 0.15);
             --warning-border: rgba(249, 115, 22, 0.3);
@@ -118,6 +130,7 @@
 
         /* ---------- Base ---------- */
         *, *::before, *::after { box-sizing: border-box; }
+        [hidden] { display: none !important; }
         html { scroll-behavior: smooth; }
         body {
             margin: 0;
@@ -152,10 +165,14 @@
         /* New Logo Component Styles */
         .brand-icon {
             display: block;
-            object-fit: cover;
+            object-fit: contain;
             margin: 0 auto;
-            /* Menambahkan bayangan putih lembut untuk membuat logo lebih menonjol */
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); 
+            /* Tile navy agar logo W putih selalu kontras di tema terang maupun gelap.
+               Padding harus px (bukan %) karena % pada img mengacu ke lebar parent. */
+            padding: 9px;
+            background: linear-gradient(135deg, var(--navy-800), var(--navy-950));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
             border-radius: 22%;
         }
         .brand-text {
@@ -187,13 +204,19 @@
         .field input::placeholder, .field textarea::placeholder { color: var(--text-faint); font-weight: 600; }
         .field input:focus, .field textarea:focus {
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+            box-shadow: 0 0 0 3px var(--focus-ring);
         }
         .field textarea { min-height: 120px; resize: vertical; font-weight: 500; line-height: 1.6; }
         .input-optional { background: var(--accent-soft) !important; border-color: var(--accent-border) !important; color: var(--accent) !important; }
         .hint-optional { margin: 2px 0 0 var(--sp-1); font-size: 9px; font-weight: 800; font-style: italic; color: var(--warning); }
         .field-row { display: flex; gap: var(--sp-4); }
         .field-row .field { flex: 1; }
+        .track-toggle {
+            display: inline-flex; align-items: center; gap: var(--sp-2); cursor: pointer;
+            font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: var(--track);
+            color: var(--text-muted); user-select: none; margin-left: var(--sp-1);
+        }
+        .track-toggle input { width: 16px; height: 16px; accent-color: var(--accent); margin: 0; }
         @media (max-width: 480px) { .field-row { flex-direction: column; } }
 
         /* ---------- Buttons ---------- */
@@ -220,8 +243,8 @@
         .btn-primary { background: var(--navy-900); color: #fff; box-shadow: var(--shadow-md); }
         .btn-primary:hover { background: var(--navy-800); }
         .btn-primary:disabled { background: var(--border-light); color: var(--text-faint); box-shadow: none; }
-        [data-theme="dark"] .btn-primary { background: var(--accent); }
-        [data-theme="dark"] .btn-primary:hover { background: #4f46e5; }
+        [data-theme="dark"] .btn-primary { background: #5865ad; }
+        [data-theme="dark"] .btn-primary:hover { background: #6975c2; }
         [data-theme="dark"] .btn-primary:disabled { background: var(--surface); }
 
         .btn-ghost { background: var(--border-light); color: var(--text-soft); }
@@ -283,7 +306,7 @@
         
         .auth-brand-inner { position: relative; z-index: 2; max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
         /* Menambah ukuran logo di desktop login agar lebih jelas dan menyesuaikan bayangannya */
-        .auth-brand-inner .brand-icon { width: 120px; height: 120px; margin: 0 auto 24px; box-shadow: 0 0 25px rgba(255, 255, 255, 0.3); }
+        .auth-brand-inner .brand-icon { width: 120px; height: 120px; padding: 22px; margin: 0 auto 24px; box-shadow: 0 0 25px rgba(255, 255, 255, 0.3); }
         .auth-brand-inner .brand-text { font-size: 56px; }
         
         .auth-glow { 
@@ -313,7 +336,7 @@
         
         /* Menambah ukuran logo di mobile login agar lebih jelas */
         .mobile-brand { display: flex; flex-direction: column; align-items: center; margin-bottom: 40px; }
-        .mobile-brand .brand-icon { width: 80px; height: 80px; margin-bottom: 12px; }
+        .mobile-brand .brand-icon { width: 80px; height: 80px; padding: 15px; margin-bottom: 12px; }
         .mobile-brand .brand-text { color: var(--navy-900); font-size: 32px; }
         [data-theme="dark"] .mobile-brand .brand-text { color: #fff; }
         @media(min-width: 900px) { .mobile-brand { display: none; } }
@@ -372,7 +395,7 @@
             padding-top: env(safe-area-inset-top);
         }
         .header-inner {
-            max-width: 1100px;
+            max-width: 1320px;
             margin: 0 auto;
             padding: var(--sp-4) var(--sp-6);
             display: grid;
@@ -439,6 +462,7 @@
         
         .top-action-btn { color: #fff; opacity: 0.7; }
         .top-action-btn:hover { opacity: 1; background: rgba(255,255,255,0.1); }
+        .top-action-btn.logout-top:hover { color: #fca5a5; background: rgba(239,68,68,0.18); }
 
         @media (min-width: 768px) {
             .header-inner {
@@ -459,7 +483,7 @@
             .header-actions { grid-column: 3; grid-row: 1; justify-self: end; position: static; }
         }
 
-        .app-main { width: 100%; max-width: 1100px; margin: 0 auto; padding: var(--sp-6) var(--sp-4) 0; }
+        .app-main { width: 100%; max-width: 1320px; margin: 0 auto; padding: var(--sp-6) var(--sp-4) 0; }
         @media (min-width: 768px) { .app-main { padding: var(--sp-8) var(--sp-8) 0; } }
 
         /* ---------- Status bar ---------- */
@@ -515,9 +539,16 @@
            ===================================================== */
         .work-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-8); align-items: start; }
         @media (min-width: 1024px) {
-            .work-grid { grid-template-columns: 5fr 7fr; gap: var(--sp-10); }
-            .form-col { position: sticky; top: 132px; }
-            .list-col { max-height: calc(100vh - 150px); overflow-y: auto; padding: 0 var(--sp-2) var(--sp-4) 0; }
+            .work-grid { grid-template-columns: 5fr 7fr; gap: var(--sp-10); position: relative; }
+            /* Kolom riwayat dikunci persis setinggi kolom form + kartu ringkasan;
+               daftar entri scroll di dalam kolomnya sendiri */
+            .list-col {
+                position: absolute;
+                top: 0; right: 0; bottom: 0;
+                width: calc((100% - var(--sp-10)) * 7 / 12);
+                overflow-y: auto;
+                padding: 0 var(--sp-2) var(--sp-4) 0;
+            }
         }
 
         .entry-form {
@@ -525,7 +556,17 @@
             border-top: 6px solid var(--accent);
             display: flex; flex-direction: column; gap: var(--sp-4);
         }
-        @media (min-width: 768px) { .entry-form { padding: var(--sp-10) var(--sp-8); } }
+        @media (min-width: 768px) { .entry-form { padding: var(--sp-8); } }
+        /* Kompaksi form di desktop agar semua kolom terlihat tanpa scroll */
+        @media (min-width: 1024px) {
+            .entry-form { gap: var(--sp-3); }
+            .entry-form .field input, .entry-form .field textarea { padding: 11px var(--sp-4); }
+            .field textarea { min-height: 88px; }
+        }
+        .btn-row { display: flex; gap: var(--sp-3); }
+        .btn-row .btn { flex: 1; padding-top: 17px; padding-bottom: 17px; }
+        .btn-row .btn-primary { flex: 1.6; }
+        @media (max-width: 480px) { .btn-row { flex-direction: column; } }
         .form-title {
             margin: 0; padding-bottom: var(--sp-4); border-bottom: 1px solid var(--border-light);
             font-size: 15px; font-weight: 900; font-style: italic; text-transform: uppercase;
@@ -537,6 +578,37 @@
         .form-status.is-error { color: var(--danger); }
 
         .list-head { display: flex; align-items: center; justify-content: space-between; padding: 0 var(--sp-4); margin-bottom: var(--sp-4); }
+        .list-actions { display: flex; align-items: center; gap: var(--sp-2); }
+
+        /* ---------- Month at a glance (fills form-column whitespace) ---------- */
+        .month-glance {
+            margin-top: var(--sp-6);
+            padding: var(--sp-5) var(--sp-4);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--sp-2);
+            text-align: center;
+        }
+        .glance-num {
+            display: block;
+            font-size: 21px;
+            font-weight: 900;
+            letter-spacing: -.02em;
+            color: var(--text);
+            font-variant-numeric: tabular-nums;
+        }
+        .glance-num.is-accent { color: var(--accent); }
+        .glance-num.is-warning { color: var(--warning); }
+        .glance-label {
+            display: block;
+            margin-top: 3px;
+            font-size: 8px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            color: var(--text-muted);
+        }
+        @media (max-width: 380px) { .month-glance { grid-template-columns: repeat(2, 1fr); row-gap: var(--sp-4); } }
         .list-title { margin: 0; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .3em; color: var(--text); }
         .count-badge { font-size: 10px; font-weight: 900; color: var(--text-muted); background: var(--border-light); padding: var(--sp-1) var(--sp-3); border-radius: var(--r-pill); }
 
@@ -547,7 +619,7 @@
             border-radius: var(--r-lg); box-shadow: var(--shadow-sm);
             padding: var(--sp-5); transition: border-color .25s var(--ease), box-shadow .25s var(--ease), transform .25s var(--ease);
         }
-        .entry-card:hover { border-color: rgba(99, 102, 241, 0.3); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+        .entry-card:hover { border-color: var(--accent-ring); box-shadow: var(--shadow-md); transform: translateY(-1px); }
         .entry-card.is-running { border-color: var(--warning-border); }
 
         .date-badge {
@@ -618,11 +690,11 @@
             padding: var(--sp-10) var(--sp-8); display: flex; flex-direction: column; align-items: center; gap: var(--sp-8); text-align: center; margin-bottom: var(--sp-8);
         }
         @media (min-width: 1024px) { .report-hero { flex-direction: row; justify-content: space-between; text-align: left; padding: 64px; } }
-        [data-theme="dark"] .report-hero { background: linear-gradient(135deg, #1e2130, #14161f); border: 1px solid var(--border); }
+        [data-theme="dark"] .report-hero { background: linear-gradient(135deg, #1e2559, #0a0e28); border: 1px solid var(--border); }
         
-        .hero-glow-rep { position: absolute; bottom: -90px; right: -90px; width: 260px; height: 260px; background: #3b82f6; border-radius: 50%; filter: blur(100px); opacity: .25; pointer-events: none; }
+        .hero-glow-rep { position: absolute; bottom: -90px; right: -90px; width: 260px; height: 260px; background: #7187b2; border-radius: 50%; filter: blur(100px); opacity: .25; pointer-events: none; }
         .hero-main { position: relative; z-index: 1; }
-        .hero-label { margin: 0 0 var(--sp-4); font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .5em; color: #bfdbfe; opacity: .85; }
+        .hero-label { margin: 0 0 var(--sp-4); font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .5em; color: #cbd3ee; opacity: .85; }
         .hero-hours { font-size: clamp(56px, 12vw, 110px); font-weight: 900; letter-spacing: -.05em; line-height: 1; font-variant-numeric: tabular-nums; }
         .hero-hours span { font-size: .3em; font-weight: 300; font-style: italic; color: rgba(255,255,255,0.5); margin-left: var(--sp-2); }
         .hero-month { margin: var(--sp-5) 0 0; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .4em; color: rgba(255,255,255,0.6); }
@@ -630,7 +702,7 @@
         @media (min-width: 1024px) { .hero-stats { justify-content: flex-start; } }
         .stat-chip {
             display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
-            border-radius: var(--r-pill); padding: 5px var(--sp-3); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #dbeafe;
+            border-radius: var(--r-pill); padding: 5px var(--sp-3); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #cbd3ee;
         }
         .stat-chip .lucide { font-size: 12px; }
         .btn-export { position: relative; z-index: 1; background: var(--accent); color: #fff; border: 1px solid rgba(255,255,255,0.15); padding: var(--sp-4) var(--sp-8); border-radius: var(--r-lg); box-shadow: var(--shadow-lg); width: 100%; max-width: 320px; }
@@ -644,7 +716,7 @@
         .report-table th { padding: var(--sp-6); background: var(--surface); font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .3em; color: var(--text-muted); white-space: nowrap; border-bottom: 1px solid var(--border); }
         .report-table td { padding: var(--sp-5) var(--sp-6); border-bottom: 1px solid var(--border-light); vertical-align: top; }
         .report-table .num { text-align: right; }
-        .client-row td { background: rgba(99, 102, 241, 0.05); border-left: 8px solid var(--accent); font-weight: 900; text-transform: uppercase; color: var(--text); font-size: 14px; }
+        .client-row td { background: var(--accent-tint); border-left: 8px solid var(--accent); font-weight: 900; text-transform: uppercase; color: var(--text); font-size: 14px; }
         .client-row .client-total { font-style: italic; color: var(--accent); font-size: 16px; letter-spacing: -.02em; }
         .data-row:hover td { background: var(--surface); }
         .cell-date { color: var(--text-muted); font-weight: 700; font-size: 11px; white-space: nowrap; }
@@ -817,6 +889,11 @@
                 syncBusy: "Menyinkronkan...",
                 syncOk: "Tersinkron",
                 btnFinish: "Selesaikan Sekarang",
+                btnFinishAll: "Selesaikan Semua",
+                modalFinishAllTxt: "Selesaikan {count} pekerjaan yang masih berjalan? Sesuaikan waktu selesai di bawah, atau matikan “Lacak Waktu” untuk menyimpannya tanpa waktu.",
+                toastFinishedAll: "{count} pekerjaan diselesaikan",
+                fTrackTime: "Lacak Waktu",
+                badgeNoTime: "Tanpa Waktu",
                 badgeRun: "Mulai {time} · Berjalan",
                 badgeTime: "{start} – {end} ({hours}h)",
                 toastSaved: "Aktivitas tersimpan",
@@ -903,6 +980,11 @@
                 syncBusy: "Syncing...",
                 syncOk: "Synced",
                 btnFinish: "Finish Now",
+                btnFinishAll: "Finish All",
+                modalFinishAllTxt: "Finish {count} running task(s)? Adjust the end time below, or turn off “Track Time” to save them without time.",
+                toastFinishedAll: "{count} tasks finished",
+                fTrackTime: "Track Time",
+                badgeNoTime: "No Time",
                 badgeRun: "Started {time} · Running",
                 badgeTime: "{start} – {end} ({hours}h)",
                 toastSaved: "Activity saved",
@@ -1021,6 +1103,10 @@
 
         var getTotalHours = function(filtered) {
             return filtered.reduce(function (sum, e) { return sum + parseFloat(e.hours || 0); }, 0);
+        };
+
+        var getRunningEntries = function() {
+            return state.entries.filter(function (e) { return !e.endTime && !e.noTime; });
         };
 
         /* =====================================================
@@ -1170,7 +1256,6 @@
 
             state.subscribedKey = key;
             state.isCloudSyncing = true;
-            updateStatusBar();
 
             var fs = window.FirebaseServices;
             var colRef = fs.collection(fs.db, 'artifacts', fs.appId, 'public', 'data', key);
@@ -1282,7 +1367,7 @@
                 '<div class="auth-split" style="flex-direction:column; justify-content:center; align-items:center; background: var(--bg);">' +
                 '  <div style="max-width:400px; width:100%; text-align:center; padding:var(--sp-6)">' +
                 /* Menambah ukuran logo di halaman setup nama */
-                '    <img src="./logo.png" alt="Woker Logo" class="brand-icon" style="width: 90px; height: 90px; margin: 0 auto 16px;">' +
+                '    <img src="./logo.png" alt="Woker Logo" class="brand-icon" style="width: 90px; height: 90px; padding: 17px; margin: 0 auto 16px;">' +
                 '    <h1 class="brand-text" style="color:var(--text); font-size:38px; margin-bottom:var(--sp-2)">WOKER</h1>' +
                 '    <h2 class="auth-title" style="margin-top:var(--sp-8)">' + t('nameTitle') + '</h2>' +
                 '    <p class="auth-sub" style="font-style:italic">' + t('nameSub') + '</p>' +
@@ -1331,13 +1416,12 @@
                 '      <div class="header-actions">' +
                 '        <button type="button" class="icon-btn top-action-btn" id="app-lang-toggle" style="font-size:10px; font-weight:900;">' + state.lang.toUpperCase() + '</button>' +
                 '        <button type="button" class="icon-btn top-action-btn" id="app-theme-toggle"><i data-lucide="moon"></i></button>' +
+                '        <button type="button" class="icon-btn top-action-btn logout-top" id="logout-btn-top" title="' + (state.lang==='id'?'Keluar':'Log Out') + ' (' + esc(state.userName) + ' · ' + esc(state.accessKey) + ')"><i data-lucide="log-out"></i></button>' +
                 '      </div>' +
                 '    </div>' +
                 '  </header>' +
 
                 '  <main class="app-main">' +
-                '    <div class="status-bar" id="status-bar"></div>' +
-
                 '    <div class="tabs" role="tablist">' +
                 '      <button type="button" class="tab-btn" id="tab-btn-input" role="tab"><i data-lucide="pen-line"></i> ' + t('tabWork') + '</button>' +
                 '      <button type="button" class="tab-btn" id="tab-btn-rekap" role="tab"><i data-lucide="bar-chart-3"></i> ' + t('tabReport') + '</button>' +
@@ -1348,15 +1432,21 @@
                 '        <div class="form-col">' +
                 '          <form id="entry-form" class="card entry-form" autocomplete="off">' +
                 '            <h3 class="form-title"><i data-lucide="briefcase"></i> ' + t('formTitle') + '</h3>' +
-                '            <div class="field">' +
-                '              <label class="label" for="f-client">' + t('fClient') + '</label>' +
-                '              <input id="f-client" type="text" required list="dl-client" placeholder="' + t('fClientPh') + '">' +
-                '            </div>' +
-                '            <div class="field">' +
-                '              <label class="label" for="f-date">' + t('fDate') + '</label>' +
-                '              <input id="f-date" type="date" required value="' + getToday() + '">' +
-                '            </div>' +
                 '            <div class="field-row">' +
+                '              <div class="field">' +
+                '                <label class="label" for="f-client">' + t('fClient') + '</label>' +
+                '                <input id="f-client" type="text" required list="dl-client" placeholder="' + t('fClientPh') + '">' +
+                '              </div>' +
+                '              <div class="field">' +
+                '                <label class="label" for="f-date">' + t('fDate') + '</label>' +
+                '                <input id="f-date" type="date" required value="' + getToday() + '">' +
+                '              </div>' +
+                '            </div>' +
+                '            <label class="track-toggle">' +
+                '              <input type="checkbox" id="f-track" checked>' +
+                '              <span>' + t('fTrackTime') + '</span>' +
+                '            </label>' +
+                '            <div class="field-row" id="time-fields">' +
                 '              <div class="field">' +
                 '                <label class="label" for="f-start">' + t('fStart') + '</label>' +
                 '                <input id="f-start" type="time" required value="' + getCurrentTime() + '">' +
@@ -1367,35 +1457,45 @@
                 '                <p class="hint-optional">' + t('fEndHint') + '</p>' +
                 '              </div>' +
                 '            </div>' +
-                '            <div class="field">' +
-                '              <label class="label" for="f-assoc">' + t('fAssoc') + '</label>' +
-                '              <input id="f-assoc" type="text" list="dl-assoc" placeholder="' + t('fAssocPh') + '">' +
-                '            </div>' +
-                '            <div class="field">' +
-                '              <label class="label" for="f-job">' + t('fJob') + '</label>' +
-                '              <input id="f-job" type="text" required list="dl-job" placeholder="' + t('fJobPh') + '">' +
+                '            <div class="field-row">' +
+                '              <div class="field">' +
+                '                <label class="label" for="f-assoc">' + t('fAssoc') + '</label>' +
+                '                <input id="f-assoc" type="text" list="dl-assoc" placeholder="' + t('fAssocPh') + '">' +
+                '              </div>' +
+                '              <div class="field">' +
+                '                <label class="label" for="f-job">' + t('fJob') + '</label>' +
+                '                <input id="f-job" type="text" required list="dl-job" placeholder="' + t('fJobPh') + '">' +
+                '              </div>' +
                 '            </div>' +
                 '            <div class="field">' +
                 '              <label class="label" for="f-task">' + t('fTask') + '</label>' +
                 '              <textarea id="f-task" required placeholder="' + t('fTaskPh') + '"></textarea>' +
                 '            </div>' +
-                '            <button type="submit" id="submit-btn" class="btn btn-primary btn-block">' +
-                '              <i data-lucide="save"></i> ' + t('btnSave') +
-                '            </button>' +
-                '            <button type="button" id="import-btn" class="btn btn-ghost btn-block">' +
-                '              <i data-lucide="file-up"></i> ' + t('btnImport') +
-                '            </button>' +
+                '            <div class="btn-row">' +
+                '              <button type="submit" id="submit-btn" class="btn btn-primary">' +
+                '                <i data-lucide="save"></i> ' + t('btnSave') +
+                '              </button>' +
+                '              <button type="button" id="import-btn" class="btn btn-ghost">' +
+                '                <i data-lucide="file-up"></i> ' + t('btnImport') +
+                '              </button>' +
+                '            </div>' +
                 '            <p id="form-status" class="form-status"></p>' +
                 '          </form>' +
                 '          <input type="file" id="import-file" accept=".xlsx,.xls,.csv" hidden>' +
                 '          <datalist id="dl-client"></datalist>' +
                 '          <datalist id="dl-assoc"></datalist>' +
                 '          <datalist id="dl-job"></datalist>' +
+                '          <div class="card month-glance" id="month-glance"></div>' +
                 '        </div>' +
                 '        <div class="list-col">' +
                 '          <div class="list-head">' +
                 '            <h3 class="list-title">' + t('listTitle') + '</h3>' +
-                '            <span class="count-badge" id="entry-count">0 ' + t('itemCount') + '</span>' +
+                '            <div class="list-actions">' +
+                '              <button type="button" id="finish-all-btn" class="btn-finish" hidden>' +
+                '                <i data-lucide="check-check"></i>' + t('btnFinishAll') +
+                '              </button>' +
+                '              <span class="count-badge" id="entry-count">0 ' + t('itemCount') + '</span>' +
+                '            </div>' +
                 '          </div>' +
                 '          <div id="entry-list" class="entry-list"></div>' +
                 '        </div>' +
@@ -1413,11 +1513,11 @@
 
             bindAppEvents();
             updateMonthLabel();
-            updateStatusBar();
             updateConnectionUI();
             renderEntryList();
             renderReport();
             updateDatalists();
+            updateMonthGlance();
             setActiveTab(state.activeTab);
             refreshIcons();
         };
@@ -1442,11 +1542,17 @@
             $('#tab-btn-input').addEventListener('click', function () { setActiveTab('input'); });
             $('#tab-btn-rekap').addEventListener('click', function () { setActiveTab('rekap'); });
 
-            $('#status-bar').addEventListener('click', function (e) {
-                if (e.target.closest('#logout-btn')) handleLogout();
-            });
+            $('#logout-btn-top').addEventListener('click', function () { handleLogout(); });
 
             $('#entry-form').addEventListener('submit', handleSubmit);
+
+            $('#f-track').addEventListener('change', function () {
+                var track = $('#f-track').checked;
+                $('#time-fields').hidden = !track;
+                $('#f-start').required = track;
+            });
+
+            $('#finish-all-btn').addEventListener('click', handleFinishAll);
 
             $('#import-btn').addEventListener('click', function () { $('#import-file').click(); });
             $('#import-file').addEventListener('change', function (e) {
@@ -1493,22 +1599,6 @@
             $('#month-year').textContent = state.currentYear;
         };
 
-        var updateStatusBar = function() {
-            var bar = $('#status-bar');
-            if (!bar) return;
-            var dotClass = state.cloudError ? 'error' : (!state.user || state.isCloudSyncing) ? 'busy' : 'ok';
-            var dotTitle = state.cloudError ? t('syncErr') : (!state.user || state.isCloudSyncing) ? t('syncBusy') : t('syncOk');
-            bar.innerHTML =
-                '<div class="status-left">' +
-                '  <span class="sync-dot ' + dotClass + '" title="' + dotTitle + '"></span>' +
-                '  <span class="status-name"><i data-lucide="user-round"></i>' + esc(state.userName) + '</span>' +
-                '  <span class="status-sep">|</span>' +
-                '  <span class="status-id">ID: ' + esc(state.accessKey) + '</span>' +
-                '</div>' +
-                '<button type="button" id="logout-btn" class="btn-logout"><i data-lucide="log-out"></i> ' + (state.lang==='id'?'Keluar':'Log Out') + '</button>';
-            refreshIcons();
-        };
-
         var updateConnectionUI = function() {
             var el = $('#form-status');
             if (el) {
@@ -1523,7 +1613,6 @@
                     el.className = 'form-status';
                 }
             }
-            updateStatusBar();
         };
 
         /* ---------- Entry list ---------- */
@@ -1531,14 +1620,19 @@
             var d = new Date(entry.date);
             var day = isNaN(d) ? '?' : d.getDate();
             var weekday = isNaN(d) ? '' : d.toLocaleDateString(state.lang === 'id' ? 'id-ID' : 'en-US', { weekday: 'short' });
-            var running = !entry.endTime;
+            var running = !entry.endTime && !entry.noTime;
 
-            var statusHTML = running
-                ? '<span class="badge badge-running"><span class="run-dot"></span>' + t('badgeRun', { time: esc(entry.startTime) }) + '</span>' +
+            var statusHTML;
+            if (entry.noTime) {
+                statusHTML = '<span class="badge badge-time"><i data-lucide="timer-off"></i>' + t('badgeNoTime') + '</span>';
+            } else if (running) {
+                statusHTML = '<span class="badge badge-running"><span class="run-dot"></span>' + t('badgeRun', { time: esc(entry.startTime) }) + '</span>' +
                   '<button type="button" class="btn-finish" data-action="finish" data-id="' + esc(entry.id) + '">' +
-                  '<i data-lucide="check-circle-2"></i>' + t('btnFinish') + '</button>'
-                : '<span class="badge badge-time"><i data-lucide="clock"></i>' +
+                  '<i data-lucide="check-circle-2"></i>' + t('btnFinish') + '</button>';
+            } else {
+                statusHTML = '<span class="badge badge-time"><i data-lucide="clock"></i>' +
                   t('badgeTime', { start: esc(entry.startTime), end: esc(entry.endTime), hours: esc(entry.hours) }) + '</span>';
+            }
 
             return (
                 '<article class="entry-card' + (running ? ' is-running' : '') + '">' +
@@ -1573,6 +1667,9 @@
             var filtered = getFilteredEntries();
             $('#entry-count').textContent = filtered.length + ' ' + t('itemCount');
 
+            var finishAllBtn = $('#finish-all-btn');
+            if (finishAllBtn) finishAllBtn.hidden = getRunningEntries().length === 0;
+
             if (!state.hasLoadedOnce && !state.cloudError) {
                 var skeleton =
                     '<div class="skeleton-card"><div class="sk sk-badge"></div><div class="sk-lines">' +
@@ -1606,7 +1703,7 @@
             var filtered = getFilteredEntries();
             var total = getTotalHours(filtered);
             var clientCount = new Set(filtered.map(function (e) { return e.client; })).size;
-            var runningCount = filtered.filter(function (e) { return !e.endTime; }).length;
+            var runningCount = filtered.filter(function (e) { return !e.endTime && !e.noTime; }).length;
 
             hero.innerHTML =
                 '<div class="report-hero">' +
@@ -1653,6 +1750,16 @@
                     var hours = parseFloat(e.hours || 0);
                     var d = new Date(e.date);
                     var dateLabel = isNaN(d) ? '-' : d.toLocaleDateString(state.lang === 'id' ? 'id-ID' : 'en-US', { day: '2-digit', month: '2-digit' });
+                    var timeCell;
+                    if (e.noTime) {
+                        timeCell =
+                        '    <div class="cell-hours">&mdash;</div>' +
+                        '    <div class="cell-times">' + t('badgeNoTime') + '</div>';
+                    } else {
+                        timeCell =
+                        '    <div class="cell-hours' + (!e.endTime ? ' running' : '') + '">' + hours.toFixed(1) + 'h</div>' +
+                        '    <div class="cell-times">' + (e.endTime ? esc(e.startTime) + ' – ' + esc(e.endTime) : (state.lang==='id'?'Mulai: ':'Start: ') + esc(e.startTime)) + '</div>';
+                    }
                     rows +=
                         '<tr class="data-row">' +
                         '  <td class="cell-date">' + dateLabel + '</td>' +
@@ -1660,10 +1767,7 @@
                         '  <td class="cell-job">' + esc(e.jobTitle || '-') + '</td>' +
                         '  <td class="cell-task">' + esc(e.task) + '</td>' +
                         '  <td class="cell-assoc">' + esc(e.associates) + '</td>' +
-                        '  <td class="num">' +
-                        '    <div class="cell-hours' + (!e.endTime ? ' running' : '') + '">' + hours.toFixed(1) + 'h</div>' +
-                        '    <div class="cell-times">' + (e.endTime ? esc(e.startTime) + ' – ' + esc(e.endTime) : (state.lang==='id'?'Mulai: ':'Start: ') + esc(e.startTime)) + '</div>' +
-                        '  </td>' +
+                        '  <td class="num">' + timeCell + '</td>' +
                         '</tr>';
                 });
             });
@@ -1706,11 +1810,25 @@
             fill('#dl-job', uniqueValues(function (e) { return e.jobTitle; }));
         };
 
+        var updateMonthGlance = function() {
+            var el = $('#month-glance');
+            if (!el) return;
+            var filtered = getFilteredEntries();
+            var total = getTotalHours(filtered);
+            var clientCount = new Set(filtered.map(function (e) { return e.client; })).size;
+            var runningCount = filtered.filter(function (e) { return !e.endTime && !e.noTime; }).length;
+            el.innerHTML =
+                '<div class="glance-item"><span class="glance-num is-accent">' + total.toFixed(1) + '<small>h</small></span><span class="glance-label">' + t('totalHours') + '</span></div>' +
+                '<div class="glance-item"><span class="glance-num">' + filtered.length + '</span><span class="glance-label">' + t('activities') + '</span></div>' +
+                '<div class="glance-item"><span class="glance-num">' + clientCount + '</span><span class="glance-label">' + t('clients') + '</span></div>' +
+                '<div class="glance-item"><span class="glance-num' + (runningCount > 0 ? ' is-warning' : '') + '">' + runningCount + '</span><span class="glance-label">' + t('running') + '</span></div>';
+        };
+
         var refreshDynamic = function() {
             renderEntryList();
             renderReport();
-            updateStatusBar();
             updateDatalists();
+            updateMonthGlance();
         };
 
         /* =====================================================
@@ -1737,8 +1855,9 @@
 
             var client = $('#f-client').value.trim();
             var date = $('#f-date').value;
-            var startTime = $('#f-start').value;
-            var endTime = $('#f-end').value;
+            var trackTime = $('#f-track').checked;
+            var startTime = trackTime ? $('#f-start').value : '';
+            var endTime = trackTime ? $('#f-end').value : '';
             var associates = $('#f-assoc').value.trim();
             var jobTitle = $('#f-job').value.trim();
             var task = $('#f-task').value.trim();
@@ -1749,8 +1868,9 @@
                 task: task,
                 date: date,
                 startTime: startTime,
-                endTime: endTime || '', 
+                endTime: endTime || '',
                 hours: endTime ? calcHours(startTime, endTime) : 0,
+                noTime: !trackTime,
                 associates: associates || '-',
                 author: state.userName,
                 userId: state.user.uid,
@@ -1840,6 +1960,66 @@
             });
         };
 
+        var handleFinishAll = function() {
+            var running = getRunningEntries();
+            if (running.length === 0) return;
+            var now = getCurrentTime();
+
+            var overlay = openModal(
+                '<div class="modal-icon"><i data-lucide="check-check"></i></div>' +
+                '<h4 class="modal-title">' + t('btnFinishAll') + '</h4>' +
+                '<p class="modal-sub">' + t('modalFinishAllTxt', { count: running.length }) + '</p>' +
+                '<div class="modal-fields">' +
+                '  <label class="track-toggle">' +
+                '    <input type="checkbox" id="fa-track" checked>' +
+                '    <span>' + t('fTrackTime') + '</span>' +
+                '  </label>' +
+                '  <div class="field" id="fa-end-field">' +
+                '    <label class="label">' + t('fEnd') + '</label>' +
+                '    <input id="fa-end" type="time" value="' + now + '">' +
+                '  </div>' +
+                '</div>' +
+                '<div class="modal-actions">' +
+                '  <button type="button" class="btn btn-ghost" data-modal-cancel>' + t('modalCancel') + '</button>' +
+                '  <button type="button" class="btn btn-primary" data-modal-ok>' + t('modalConfirm') + '</button>' +
+                '</div>',
+                true
+            );
+
+            overlay.querySelector('#fa-track').addEventListener('change', function () {
+                overlay.querySelector('#fa-end-field').hidden = !overlay.querySelector('#fa-track').checked;
+            });
+            overlay.querySelector('[data-modal-cancel]').addEventListener('click', function () { closeModal(overlay); });
+            overlay.querySelector('[data-modal-ok]').addEventListener('click', async function () {
+                var track = overlay.querySelector('#fa-track').checked;
+                var endTime = overlay.querySelector('#fa-end').value;
+                if (track && !endTime) {
+                    showInfoModal(t('errIncomplete'));
+                    return;
+                }
+
+                var okBtn = overlay.querySelector('[data-modal-ok]');
+                okBtn.disabled = true;
+                okBtn.innerHTML = '<span class="spinner"></span>';
+
+                var fs = window.FirebaseServices;
+                try {
+                    await Promise.all(running.map(function (entry) {
+                        var docRef = fs.doc(fs.db, 'artifacts', fs.appId, 'public', 'data', safeCollectionKey(state.accessKey), entry.id);
+                        return fs.updateDoc(docRef, track
+                            ? { endTime: endTime, hours: calcHours(entry.startTime, endTime) }
+                            : { noTime: true, startTime: '', endTime: '', hours: 0 });
+                    }));
+                    closeModal(overlay);
+                    showToast(t('toastFinishedAll', { count: running.length }));
+                } catch (err) {
+                    console.error('Finish All Error:', err);
+                    closeModal(overlay);
+                    showInfoModal(t('syncErr'));
+                }
+            });
+        };
+
         var openEditModal = function(entry) {
             var overlay = openModal(
                 '<div class="modal-icon"><i data-lucide="pencil-line"></i></div>' +
@@ -1853,7 +2033,11 @@
                 '    <div class="field"><label class="label">' + t('fDate') + '</label><input id="me-date" type="date" value="' + esc(entry.date) + '"></div>' +
                 '    <div class="field"><label class="label">' + t('fAssoc') + '</label><input id="me-assoc" type="text" list="dl-assoc" value="' + esc(entry.associates) + '"></div>' +
                 '  </div>' +
-                '  <div class="field-row">' +
+                '  <label class="track-toggle">' +
+                '    <input type="checkbox" id="me-track"' + (!entry.noTime ? ' checked' : '') + '>' +
+                '    <span>' + t('fTrackTime') + '</span>' +
+                '  </label>' +
+                '  <div class="field-row" id="me-time-row"' + (entry.noTime ? ' hidden' : '') + '>' +
                 '    <div class="field"><label class="label">' + t('fStart') + '</label><input id="me-start" type="time" value="' + esc(entry.startTime) + '"></div>' +
                 '    <div class="field"><label class="label">' + t('fEnd') + '</label><input id="me-end" type="time" class="' + (!entry.endTime ? 'input-optional' : '') + '" value="' + esc(entry.endTime || '') + '"></div>' +
                 '  </div>' +
@@ -1873,16 +2057,20 @@
             );
 
             overlay.querySelector('[data-modal-cancel]').addEventListener('click', function () { closeModal(overlay); });
+            overlay.querySelector('#me-track').addEventListener('change', function () {
+                overlay.querySelector('#me-time-row').hidden = !overlay.querySelector('#me-track').checked;
+            });
             overlay.querySelector('[data-modal-save]').addEventListener('click', async function () {
                 var client = overlay.querySelector('#me-client').value.trim();
                 var date = overlay.querySelector('#me-date').value;
                 var associates = overlay.querySelector('#me-assoc').value.trim();
-                var startTime = overlay.querySelector('#me-start').value;
-                var endTime = overlay.querySelector('#me-end').value;
+                var track = overlay.querySelector('#me-track').checked;
+                var startTime = track ? overlay.querySelector('#me-start').value : '';
+                var endTime = track ? overlay.querySelector('#me-end').value : '';
                 var jobTitle = overlay.querySelector('#me-job').value.trim();
                 var task = overlay.querySelector('#me-task').value.trim();
 
-                if (!client || !date || !startTime || !jobTitle || !task) {
+                if (!client || !date || (track && !startTime) || !jobTitle || !task) {
                     showInfoModal(state.lang==='id'?'Mohon lengkapi field yang wajib.':'Please complete required fields.');
                     return;
                 }
@@ -1910,6 +2098,7 @@
                         endTime: endTime || '',
                         jobTitle: jobTitle,
                         task: task,
+                        noTime: !track,
                         hours: parseFloat(calculatedHours.toFixed(2))
                     });
                     closeModal(overlay);
@@ -2167,6 +2356,7 @@
                             startTime: it.startTime,
                             endTime: it.endTime || '',
                             hours: (it.startTime && it.endTime) ? calcHours(it.startTime, it.endTime) : 0,
+                            noTime: !it.startTime && !it.endTime,
                             associates: it.associates || '-',
                             author: state.userName,
                             userId: state.user.uid,
@@ -2245,9 +2435,9 @@
                         e.jobTitle || '-',
                         e.task,
                         e.associates || '-',
-                        e.startTime || '-',
-                        e.endTime || 'Masih Berjalan',
-                        e.hours
+                        e.noTime ? '-' : (e.startTime || '-'),
+                        e.noTime ? '-' : (e.endTime || 'Masih Berjalan'),
+                        e.noTime ? '-' : e.hours
                     ]);
                 });
 
